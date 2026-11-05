@@ -142,9 +142,16 @@ def split_arm(src, dst_dir, name):
 
 
 def main():
+    # Clear the tree but keep .git: once the artifact has been pushed, the output
+    # directory IS the working copy, and wiping its history on every rebuild would also
+    # fail outright, since git marks pack files read-only.
     if os.path.exists(OUT):
-        shutil.rmtree(OUT)
-    os.makedirs(OUT)
+        for e in os.listdir(OUT):
+            if e == ".git":
+                continue
+            p = os.path.join(OUT, e)
+            shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
+    os.makedirs(OUT, exist_ok=True)
     print("building into", OUT)
 
     # ---- scripts
@@ -244,17 +251,23 @@ def main():
             encoding="utf-8", newline="\n").write("\n".join(lines) + "\n")
     print("  corpora: %d checksums, data not redistributed" % len(lines))
 
+    copy_text(os.path.join(ROOT, "scripts", "artifact_LICENSE"),
+              os.path.join(OUT, "LICENSE"))
     copy_text(os.path.join(ROOT, "scripts", "artifact_README.md"),
               os.path.join(OUT, "README.md"))
-    print("  README: copied from scripts/artifact_README.md")
+    print("  README and LICENSE: copied from scripts/artifact_*")
 
     io.open(os.path.join(OUT, ".gitignore"), "w", encoding="utf-8", newline="\n").write(
         "__pycache__/\n*.pyc\n_scratch/\ndata/malicious_skill_bench/\n"
         "data/skillmd_138k/\n")
 
     # ---- the gate: re-scan the output and refuse to leave a tree that leaks
+    # .git is skipped: it is local metadata, never served by Anonymous GitHub, and its
+    # config necessarily holds the remote URL. The commits themselves are authored as
+    # "Anonymous Author", so the history carries no name either.
     hits = []
-    for dp, _, fs in os.walk(OUT):
+    for dp, dirs, fs in os.walk(OUT):
+        dirs[:] = [d for d in dirs if d != ".git"]
         for f in fs:
             p = os.path.join(dp, f)
             rel = os.path.relpath(p, OUT)
@@ -276,15 +289,19 @@ def main():
         for h in hits[:40]:
             print("  " + h)
         sys.exit(1)
-    nf = sum(len(fs) for _, _, fs in os.walk(OUT))
-    sz = sum(os.path.getsize(os.path.join(d, f))
-             for d, _, fs in os.walk(OUT) for f in fs)
+    def shipped():
+        for d, dirs, fs in os.walk(OUT):
+            dirs[:] = [x for x in dirs if x != ".git"]
+            for f in fs:
+                yield os.path.join(d, f)
+    files = list(shipped())
+    nf = len(files)
+    sz = sum(os.path.getsize(p) for p in files)
     print("identity scan clean: 0 hits over %d files" % nf)
     print("tree: %d files, %.1f MB" % (nf, sz / 1e6))
     print("non-ASCII paths left:",
-          [os.path.relpath(os.path.join(d, f), OUT)
-           for d, _, fs in os.walk(OUT) for f in fs
-           if not all(ord(c) < 128 for c in f)] or "none")
+          [os.path.relpath(p, OUT) for p in files
+           if not all(ord(c) < 128 for c in os.path.basename(p))] or "none")
 
 
 def _mk(*parts):

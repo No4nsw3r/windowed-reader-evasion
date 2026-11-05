@@ -152,8 +152,13 @@ packet builders and the readers do.
 
 ## Licence
 
-A licence for the scripts and result tables is not yet chosen; it will be set before the
-camera-ready release. The redistributed corpus items under `audit/items`
-and `audit_jointmiss/items` come from MaliciousSkillBench and SkillMD-138K, both CC-BY-4.0,
-and are included under those terms with attribution. Skill text in this artifact is inert
-data: nothing here executes it, and neither should you.
+| What | Terms |
+|---|---|
+| `scripts/` | MIT, see `LICENSE` |
+| the result tables under `research_notes/` and `followup_results/`, and the audit sheets and keys | CC-BY-4.0 |
+| the corpus items under `audit/items` and `audit_jointmiss/items` | CC-BY-4.0, from MaliciousSkillBench and SkillMD-138K, redistributed under those terms with attribution |
+
+The copyright line in `LICENSE` reads `The Authors` for the duration of anonymous review
+and is replaced with the named authors in the archival release.
+
+Skill text in this artifact is inert data: nothing here executes it, and neither should you.
