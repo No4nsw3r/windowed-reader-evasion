@@ -181,10 +181,14 @@ than leaving a tree that leaks. Please do not try to attribute it.
 
 ## Known gaps, stated rather than left to be found
 
-- **`audit/rubric_ko.md` and `audit_jointmiss/GUIDE_ko.md` are in Korean.** These are the two
-  audit instruments as actually administered, so they ship unaltered rather than paraphrased.
-  An English translation is not yet included; if one is added, the original stays
-  authoritative.
+- **Both audit instruments were administered in Korean.** They ship unaltered, as
+  `audit/rubric_ko.md` and `audit_jointmiss/GUIDE_ko.md`, each with an English translation
+  beside it: `audit/rubric_en.md` and `audit_jointmiss/GUIDE_en.md`. The translations were
+  written after the audits were complete and carry everything that governed a verdict — the
+  strata, the criteria, the boundary rules, the prohibitions, the recording conventions and
+  the order of work — plus, for the human audit, the interpretation that was fixed before any
+  item was read. They omit sections of the originals that did not bear on judging, and say
+  which. The Korean originals remain authoritative.
 - **`scripts/v2_final_recompute.py` section 5 is a superseded computation.** It builds the
   two-geometry table with the `skillgate` reader, which is the *mistaken half window width*
   the paper corrects. The published table uses the width-corrected `regex_real` reader in

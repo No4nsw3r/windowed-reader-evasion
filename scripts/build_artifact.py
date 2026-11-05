@@ -218,6 +218,8 @@ def main():
               os.path.join(OUT, "audit", "README.md"))
     copy_text(os.path.join(ROOT, "audit", "PHASE5_지침.md"),
               os.path.join(OUT, "audit", "rubric_ko.md"))
+    copy_text(os.path.join(ROOT, "audit", "rubric_en.md"),
+              os.path.join(OUT, "audit", "rubric_en.md"))
     print("  label audit: %d of 450 items shipped, %d stratum-B withheld"
           % (ni, len(bad)))
 
@@ -231,7 +233,8 @@ def main():
     for rel, dst in (("key/key.csv", "key/key.csv"),
                      ("sheet.csv", "sheet_blank.csv"),
                      ("sheet_human.csv", "sheet_human.csv"),
-                     ("START_HERE.md", "GUIDE_ko.md")):
+                     ("START_HERE.md", "GUIDE_ko.md"),
+                     ("GUIDE_en.md", "GUIDE_en.md")):
         copy_text(os.path.join(src, rel), os.path.join(OUT, "audit_jointmiss", dst))
     print("  human audit: %d items, the filled sheet and the key" % nj)
 
