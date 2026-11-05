@@ -77,6 +77,11 @@ def _load_arm(arm):
             d["phase"] = os.path.basename(fp).split("_items")[0]
             rows.append(d[["phase", "model", "defense", "attack",
                            "skill_hash", "verdict"]])
+    if not rows:
+        # The public artifact withholds the benign arm's per-item rows, so this returns
+        # empty there rather than raising. Identical behaviour when the rows are present.
+        return pd.DataFrame(columns=["phase", "model", "defense", "attack",
+                                     "skill_hash", "verdict"])
     d = pd.concat(rows, ignore_index=True)
     d["skill_hash"] = d.skill_hash.astype(str)
     return d
@@ -103,6 +108,8 @@ def asr_cells(drop_hashes):
 
 def fpr_cells(drop_hashes):
     d = _load_arm("ben")
+    if d.empty:
+        return None
     d = d[d.attack == "clean"]
 
     def agg(g):
@@ -214,7 +221,13 @@ def main():
 
     f = fpr_cells(drop_ben)
     L.append("\n\n### Benign FPR, before and after\n")
-    L.append(f.round(3).to_markdown())
+    L.append(f.round(3).to_markdown() if f is not None else
+             "Not computable here: the benign arm's per-item rows are withheld from the\n"
+             "public artifact, because a per-skill false-positive label is a lasting\n"
+             "accusation against third-party code. The per-judge counts that reproduce\n"
+             "every published false-positive rate are in\n"
+             "`research_notes/v2_main/_benign_aggregate/`, and its README works the\n"
+             "calculation through. Everything above this line is unaffected.")
     L.append("\n")
 
     txt = "\n".join(str(x) for x in L)

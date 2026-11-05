@@ -68,7 +68,7 @@ root**; the paths are relative to it.
 python -I scripts/v3_jointmiss_audit_score.py     # the human audit and the corrected floor
 python -I scripts/v2_phase5_audit_score.py        # the 450-item label audit
 python -I scripts/v2_label_robustness.py          # the multiply-caught restrictions
-python -I scripts/v2_orgeom_indep.py              # the two-geometry independence table
+python -I scripts/v3_orgeom_verify.py             # the two-geometry independence table
 ```
 
 Run the first one if you only run one. It refuses to report anything unless the paper's
@@ -104,7 +104,7 @@ python -I scripts/acquire_data.py     # MaliciousSkillBench, and a bounded Skill
 | 450-item label audit: the disputed share of the caught set, agreement, the syntactic floor | `scripts/v2_phase5_audit_score.py` | `audit/` |
 | The defense ordering under the multiply-caught restrictions, 30 comparisons of 30 | `scripts/v2_label_robustness.py` | `research_notes/v2_main/v2_phase*_items.csv` |
 | The two reader geometries, their window arithmetic, and the regex-anchored reader | `scripts/v2_skillgate.py` | `research_notes/v2_main/v2_skillgate_items.csv` |
-| Composing the two geometries, and the independence test on the artifacts both readers pass | `scripts/v2_orgeom_indep.py` | `followup_results/exp2_cells.csv` + the per-judge partition tables |
+| Composing the two geometries, and the independence test on the artifacts both readers pass | `scripts/v3_orgeom_verify.py` | `followup_results/exp2_cells.csv` + the per-judge partition tables |
 | Prompt Overflow's contiguity gate, swept over its calibration threshold | `scripts/v3_gate_score.py`, `scripts/v3_gate_analyze.py` | `followup_results/`, per-window scores |
 | Span-level reader coverage: whether a whole malicious instruction lands in a window | `scripts/v3_span_read_frac.py` | `research_notes/v2_main/v3_span_read_frac_*.csv` |
 | Cross-judge replication | `scripts/v2_phase3_cross.py`, `scripts/v2_final_recompute.py` | `research_notes/v2_main/v2_phase3_items_*.csv` |
@@ -189,14 +189,34 @@ than leaving a tree that leaks. Please do not try to attribute it.
   the order of work — plus, for the human audit, the interpretation that was fixed before any
   item was read. They omit sections of the originals that did not bear on judging, and say
   which. The Korean originals remain authoritative.
-- **`scripts/v2_final_recompute.py` section 5 is a superseded computation.** It builds the
-  two-geometry table with the `skillgate` reader, which is the *mistaken half window width*
-  the paper corrects. The published table uses the width-corrected `regex_real` reader in
-  `followup_results/exp2_cells.csv`. The two agree closely on two of the five judges and
-  differ on the others, so a wrong-reader run looks plausible: gate any recomputation on
-  reproducing the published cells (`165/14/19/26`, `120/19/9/20`, `120/8/10/30`,
-  `92/24/5/23`, `58/5/2/9`) before trusting it. `scripts/v2_orgeom_indep.py` is the correct
-  entry point.
+- **Two shipped scripts build the two-geometry table with the superseded reader.**
+  `scripts/v2_orgeom_indep.py` and section 5 of `scripts/v2_final_recompute.py` both read
+  `reader == "skillgate"`, which is the *mistaken half window width* the paper corrects. The
+  published table uses the width-corrected `regex_real` reader in
+  `followup_results/exp2_cells.csv`, paired item by item with each judge's partition
+  verdicts. The two agree closely on some judges and differ on others, so a wrong-reader run
+  looks plausible rather than broken, which is how it survived. **Use
+  `scripts/v3_orgeom_verify.py`**: it refuses to print anything until it has reproduced the
+  published cells exactly (`165/14/19/26`, `120/19/9/20`, `120/8/10/30`, `92/24/5/23`,
+  `58/5/2/9`), and then runs the same table with the label-suspect skills deleted. The two
+  older scripts are left in place because they produced numbers in the v2 record, not
+  because they should be run now.
+- **Two figures cannot be recomputed here, both because of the benign-arm withholding, and
+  neither is an error in the paper.** First, the reliability subsample behind Cohen's kappa
+  is 100 items stratified across the four strata, 25 of them stratum B; with B withheld,
+  `scripts/v2_phase5_audit_score.py` computes kappa over the 75 that remain and prints
+  $0.903$ and $0.899$ where the paper reports $0.942$ and $0.940$ over all 100. The stratum-A
+  disputed share, 14 of 283 at $0.049$ $[0.030, 0.081]$, does reproduce exactly. Second,
+  `scripts/v3_gate_analyze.py` keeps only cells whose every window is present and decides
+  that by joining against the published verdicts in `v2_phase1_items.csv`, whose benign rows
+  are withheld, so every benign cell drops and it cannot calibrate $\theta_b$. The benign
+  window scores themselves do ship, under surrogate ids in `v3_gate_windows.jsonl`, so the
+  quantity is directly computable: the 99th percentile of those 11,651 scores is $0.9975$.
+- **The per-window gate scores ship with the benign arm's skill identities replaced.** Each
+  record keeps its score, window index, length and label; a benign record's `skill_hash` is a
+  surrogate assigned in order of first appearance, because the real one together with the
+  per-window label is the benign arm's per-skill verdict. Malicious records are verbatim.
+  `scripts/build_artifact.py` does this in `copy_gate_windows`.
 - **The pilot tables in `research_notes/pilot/` are superseded.** They ship because the paper
   reports a correction to its own earlier measurement, and that correction is only checkable
   against them.

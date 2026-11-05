@@ -24,6 +24,7 @@ usage: python -I scripts/build_artifact.py [outdir]
 """
 import hashlib
 import io
+import json
 import os
 import re
 import shutil
@@ -141,6 +142,42 @@ def split_arm(src, dst_dir, name):
     return len(keep), len(ben)
 
 
+def copy_gate_windows(src, dst):
+    """Ship the per-window gate scores, with the benign arm's skill identities removed.
+
+    Open Science promises these scores so that the contiguity-gate sweep can be recomputed
+    at any threshold. But the file holds one record per window for both arms, and a benign
+    record carries a skill_hash together with a per-window label -- that is the benign arm's
+    per-skill verdict, which is withheld everywhere else in this release.
+
+    theta_b is a percentile over the benign window SCORES, so the calibration needs the
+    numbers and not the names. Benign records keep every field and get a surrogate id
+    assigned in order of first appearance; the script keys cells on
+    (arm, skill_hash, attack, defense), so grouping is preserved exactly. Malicious records
+    pass through untouched.
+    """
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    sur, n_ben, n_mal = {}, 0, 0
+    with io.open(src, encoding="utf-8") as fh, \
+            io.open(dst, "w", encoding="utf-8", newline="\n") as out:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            r = json.loads(line)
+            if r.get("arm") == "ben":
+                h = str(r.get("skill_hash"))
+                if h not in sur:
+                    sur[h] = "ben%05d" % (len(sur) + 1)
+                r["skill_hash"] = sur[h]
+                n_ben += 1
+            else:
+                n_mal += 1
+            out.write(json.dumps(r, sort_keys=True) + "\n")
+    print("  gate windows: %d malicious records verbatim, %d benign records over %d "
+          "surrogate ids" % (n_mal, n_ben, len(sur)))
+
+
 def main():
     # Clear the tree but keep .git: once the artifact has been pushed, the output
     # directory IS the working copy, and wiping its history on every rebuild would also
@@ -180,6 +217,8 @@ def main():
                 k, h = split_arm(p, dd, f)
                 kept += k
                 held += h
+            elif f == "v3_gate_windows.jsonl":
+                copy_gate_windows(p, os.path.join(dd, f))
             elif f in MD_OK:
                 copy_text(p, os.path.join(dd, f))
     print("  result rows: %d shipped, %d benign rows replaced by counts" % (kept, held))
