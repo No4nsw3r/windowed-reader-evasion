@@ -1,0 +1,9 @@
+model,arm,attack,defense,verdict,n
+qwen3:8b,ben,clean,dedup_full,MALICIOUS,8
+qwen3:8b,ben,clean,dedup_full,SAFE,292
+qwen3:8b,ben,clean,dedup_lmax,MALICIOUS,7
+qwen3:8b,ben,clean,dedup_lmax,OVERFLOW,8
+qwen3:8b,ben,clean,dedup_lmax,SAFE,285
+qwen3:8b,ben,clean,dedup_small,MALICIOUS,8
+qwen3:8b,ben,clean,dedup_small,SAFE,292
+qwen3:8b,ben,clean,none,SAFE,300

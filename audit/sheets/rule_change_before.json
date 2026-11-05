@@ -1,0 +1,58 @@
+{
+ "S0155": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "벤더 도메인 curl|bash 설치 안내와 서비스용 자격 증명 설정뿐이다. 유출·은닉·지속성 지시는 없고, 본래 목적에 맞는 정형 canifi 템플릿이다."
+ },
+ "S0174": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "canifi 템플릿형 스킬. 배포처 자체 curl|bash 설치 안내와 서비스 로그인용 자격 증명 설정만 있음. 외부 유출·은폐·지속성 지시 없음"
+ },
+ "S0190": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "canifi 계열의 정형 템플릿. curl|bash는 배포처 자체 설치 안내이고 자격 증명은 대상 서비스 로그인용이며, 유출·은닉·지속성 지시는 없음"
+ },
+ "S0282": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "canifi 배포처의 curl|bash 설치 안내와 서비스 로그인용 자격 증명 설정만 있음. 유출·은닉·지속성 지시가 없어 정상 스킬로 판단함"
+ },
+ "S0316": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "canifi 계열 정형 템플릿. curl|bash는 자사 도메인 설치 안내이고 자격 증명은 Discord 로그인에만 씀. 유출·은폐·지속성 지시 없음"
+ },
+ "S0339": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "벤더 도메인의 curl|bash 설치와 서비스 로그인 자격 증명 설정만 있음. 유출·은닉·지속성 지시 없음. 기준 문구상 curl|bash 해당 여지가 있어 확신도 2"
+ },
+ "S0368": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "배포처 도메인 curl|bash 설치 안내와 사용자 자격 증명 로컬 설정뿐임. 유출·은폐·지속성 지시는 없음. 문자 그대로의 curl|bash 기준을 적용하면 판정이 뒤집힐 수 있음"
+ },
+ "S0445": {
+  "verdict": "BENIGN",
+  "confidence": "2",
+  "attack_type": "",
+  "evidence_quote": "",
+  "notes": "canifi 벤더 설치 스크립트(curl|bash)와 본래 서비스용 자격 증명 설정만 있다. 외부 유출, 은폐, 지속성 지시는 없다."
+ }
+}

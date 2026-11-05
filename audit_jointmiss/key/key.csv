@@ -1,0 +1,151 @@
+﻿item_id,tier,stratum,chars,skill_hash,benchmark_id,provenance,source_name,attack_categories,family,prior_item,prior_verdict
+J001,1,J,2790,a95f8769dd95e4d90854688f7661c5c4,ASB04_003769,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_3326,,
+J002,1,J,772,e390d3c5459b999c48307da572e26b06,ASB04_005550,mixed_unresolved,MalSkillBench,,FAMILY_2294,,
+J003,1,J,1458,d89d6af5558c914fac3f1f160b953310,ASB04_005855,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_4350,,
+J004,1,N,5648,61fe5d6e1c56283d98e4f71f346ddd39,,skillmd_138k,skillmd_138k,,,S0347,BENIGN
+J005,1,J,1460,d087181b2081c6448e830edd611759be,ASB04_006601,injected,SkillHarm,,FAMILY_3178,,
+J006,1,J,2273,d538ece349fd6aa1912f43cf253946a6,ASB04_003668,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_3680,,
+J007,1,J,1261,942fac27ec95d44b5b9ecfb0aea862b7,ASB04_005238,mixed_unresolved,MalSkillBench,Resource / Availability Abuse,FAMILY_2801,,
+J008,1,J,2687,fd3b2b060c4f53fd53e2ba47eb96b583,ASB04_004352,injected,SkillHarm,,FAMILY_3056,,
+J009,1,J,1527,8b468993ba7176ec661085da3b8c9325,ASB04_006112,injected,SkillTrustBench,Execution / Code Delivery;Persistence / Control;Privilege / Tool / Authority Abuse,FAMILY_3353,,
+J010,1,J,2617,549edf40b21ba8c0dbd1e6def49a7c07,ASB04_002965,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3373,,
+J011,1,N,7565,79d4b7405deb5449b3935d11e235e860,,skillmd_138k,skillmd_138k,,,S0433,BENIGN
+J012,1,J,1030,d49b9157858de3440f039dfa1821f568,ASB04_005538,test_fixture,AgentTrap,Privilege / Tool / Authority Abuse,FAMILY_3002,,
+J013,1,J,2152,943196928ab711554e3c96c17525bdc3,ASB04_006114,injected,SkillHarm,,FAMILY_3181,,
+J014,1,J,673,f93e6c2ad8a9a6571dfbfac2d4c74e0f,ASB04_004048,mixed_unresolved,MalSkillBench,Execution / Code Delivery,FAMILY_1565,,
+J015,1,J,255,079e52024b059eb00e2bd20c83de057f,ASB04_000233,wild,SkillLeakBench,Credential Access;Execution / Code Delivery;Resource / Availability Abuse,FAMILY_0182,,
+J016,1,J,2693,573bd76b361fc97b28fce23635bb80fc,ASB04_006129,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_3840,S0214,MALICIOUS
+J017,1,J,2226,07de4feb40feb966e1392a4f6fb1c392,ASB04_005024,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4142,,
+J018,1,N,3210,e728eb799870f5fd301a0bc452f0f5eb,,skillmd_138k,skillmd_138k,,,S0123,BENIGN
+J019,1,J,1483,85569cd8b5e14468bd463e3e0f117297,ASB04_005985,mixed_unresolved,MalSkillBench,,FAMILY_1806,,
+J020,1,P,2525,c9822b11e33879ed8b54befe6e5e98b1,ASB04_000502,mixed_unresolved,MalSkillBench,,FAMILY_1342,S0408,MALICIOUS
+J021,1,J,733,19b984da55f7367b9d064bcd27f92bd4,ASB04_002155,injected,SkillHarm,,FAMILY_3164,,
+J022,1,J,1693,10899b5efef86db87a26597714a64739,ASB04_000649,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3524,,
+J023,1,J,2094,b577a22f879621d81efff74e010ab300,ASB04_006483,injected,SkillHarm,,FAMILY_3090,S0166,UNCLEAR
+J024,1,J,1237,f0bb0a4e3112283cfcaf8f3fb13a337d,ASB04_004974,mixed_unresolved,MalSkillBench,Instruction / Goal / Memory Manipulation,FAMILY_0774,,
+J025,1,J,583,48f7d910a4019bf3561c3168a6a3476f,ASB04_006295,test_fixture,AgentTrap,Data Exfiltration / Disclosure,FAMILY_2988,,
+J026,1,J,1214,4b7904f7ea01cbd98cb560c64c914bd5,ASB04_006952,injected,SkillHarm,,FAMILY_3065,,
+J027,1,P,2037,3af109bf58e3f33393d0bb5d9993e767,ASB04_001162,mixed_unresolved,MalSkillBench,,FAMILY_2291,S0329,MALICIOUS
+J028,1,J,2013,47161f32c67db401f02e03c549990420,ASB04_000032,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3717,,
+J029,1,J,1923,0d9211884c082824307b33f5dc19d0c9,ASB04_006992,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3602,,
+J030,1,J,2500,33efc79d5579b7062842e58b0244c208,ASB04_002192,mixed_unresolved,MalSkillBench,,FAMILY_1354,S0095,BENIGN
+J031,1,J,1491,85cd9dfecc2d0cd2ed6a5b0a8b33885f,ASB04_006237,injected,SkillTrustBench,Instruction / Goal / Memory Manipulation,FAMILY_3737,,
+J032,1,P,254,4cef979607d5dd297c374f8ed9bcb45b,ASB04_003777,mixed_unresolved,MalSkillBench,,FAMILY_0958,S0114,MALICIOUS
+J033,1,J,2593,893f385bc87d68fd0489af58044b62f0,ASB04_001616,injected,SkillHarm,,FAMILY_3100,,
+J034,1,J,414,fe58f7a2b6e89c5d4a45e865b100bc1f,ASB04_002459,test_fixture,AgentTrap,Privilege / Tool / Authority Abuse,FAMILY_2987,,
+J035,1,J,1313,840eecfd4669d0281d1f266ace6f9c95,ASB04_007070,injected,SkillHarm,,FAMILY_3060,,
+J036,1,J,1479,a80c4af0c703c0bb207486ef7c652b01,ASB04_001374,injected,SkillHarm,,FAMILY_3215,,
+J037,1,J,977,69442665de659c7a5ca845eb4f30f056,ASB04_007157,test_fixture,AgentTrap,Execution / Code Delivery,FAMILY_3005,,
+J038,1,P,1256,325e370e2dc17ea54c34fbfb2cae5b6f,ASB04_002575,mixed_unresolved,MalSkillBench,,FAMILY_0266,S0312,MALICIOUS
+J039,1,N,7201,1e5480cdd3d5a8e488fab22e627ffe10,,skillmd_138k,skillmd_138k,,,S0199,BENIGN
+J040,1,J,1780,f5d11ab2692a8c83835e3905c43a2fcd,ASB04_003657,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4271,,
+J041,1,P,1052,46ba130cb87dcc8e1313432a57d23891,ASB04_003245,mixed_unresolved,MalSkillBench,,FAMILY_2183,S0384,MALICIOUS
+J042,1,J,2444,be272c14ba7508010aa0a27d5686d886,ASB04_005252,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4462,,
+J043,1,J,2995,b909a375f8c59b551360f353800aae27,ASB04_001259,wild,Agent Skill Malware,,FAMILY_2932,,
+J044,1,J,2814,19843f0ca7f8f3fb6b05563222c7c297,ASB04_002072,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3965,,
+J045,1,P,2767,215a862b04327f47513219fdde17447d,ASB04_004848,mixed_unresolved,MalSkillBench,,FAMILY_1255,S0091,MALICIOUS
+J046,1,J,1443,ed69fb20b60d1d0e9d04ed46176b3a70,ASB04_001267,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4056,,
+J047,1,P,1773,0324fd3df89d1dcfb774d5abfcfc1f38,ASB04_005041,mixed_unresolved,MalSkillBench,,FAMILY_1695,S0031,MALICIOUS
+J048,1,J,1906,595e751dc953579a7b158aed73cec932,ASB04_001689,injected,SkillTrustBench,Dependency / Supply-Chain Abuse;Execution / Code Delivery,FAMILY_3430,,
+J049,1,J,1881,d3de01d6bca42047019733579560c133,ASB04_000688,injected,SkillHarm,,FAMILY_3210,,
+J050,1,J,1106,06ddb952cda6a0a7f6eb8dbdd56ecf23,ASB04_002835,mixed_unresolved,MalSkillBench,Data Exfiltration / Disclosure,FAMILY_2690,,
+J051,1,N,6661,a2af829114ec6b10197257df841d09cd,,skillmd_138k,skillmd_138k,,,S0255,BENIGN
+J052,1,J,1546,0dcc6465d1ccdf41d51c38c511475543,ASB04_001200,injected,SkillSafetyBench,,FAMILY_4571,,
+J053,1,J,2415,45c9f84fe8f34ebb8606bed0e6741468,ASB04_001466,mixed_unresolved,MalSkillBench,,FAMILY_2904,,
+J054,1,P,458,1e99c02a5407c8f0d1a8885a96da87c8,ASB04_006752,mixed_unresolved,MalSkillBench,,FAMILY_0700,S0046,MALICIOUS
+J055,1,J,1994,ba30b951e151dafe828900dc1bc4558d,ASB04_001886,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_4309,,
+J056,1,J,1295,21fb137e6429b9223e46a298a8fa6ba2,ASB04_002571,test_fixture,ATR Skill Security Benchmark,Dependency / Supply-Chain Abuse,FAMILY_4514,S0313,MALICIOUS
+J057,1,J,2352,0bf7b0475aa9cb115d70b588408f7d49,ASB04_006323,mixed_unresolved,MalSkillBench,,FAMILY_0928,,
+J058,1,J,1926,a447cf94df9c81318d8f02eb1f9e6cc5,ASB04_006918,injected,SkillSafetyBench,Execution / Code Delivery;Integrity / Output Manipulation,FAMILY_4572,,
+J059,1,J,2022,bbff78f0d325330b1a9eef0605d1d51c,ASB04_002673,mixed_unresolved,MalSkillBench,,FAMILY_0480,,
+J060,1,J,1371,6844adb3cb35b48bfbb7d95ad5e97d56,ASB04_003138,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_4083,,
+J061,1,J,2325,988b42d2f1c4f0ff856f4e100cd96c67,ASB04_002431,injected,SkillHarm,,FAMILY_3229,,
+J062,1,N,5282,b48b8bd74726fe4834edf2c8d8441bb4,,skillmd_138k,skillmd_138k,,,S0104,BENIGN
+J063,1,J,1455,9431f86b30148fdabc4790bab8be658b,ASB04_003472,mixed_unresolved,MalSkillBench,,FAMILY_0380,,
+J064,1,J,1989,3dc9759cfebc82c983a8e4142f5631b7,ASB04_001431,injected,SkillTrustBench,Dependency / Supply-Chain Abuse;Execution / Code Delivery,FAMILY_3770,,
+J065,1,J,2595,89bbd139eabd41708beddfebec7f80f0,ASB04_004884,wild,SkillLeakBench,Execution / Code Delivery,FAMILY_0188,,
+J066,1,J,1767,e228cc5735db7e4cbf835f6c76946a91,ASB04_000762,injected,SkillHarm,,FAMILY_3021,,
+J067,1,J,2510,19062320ef73e6365c90ad0733321df5,ASB04_001687,injected,SkillTrustBench,Dependency / Supply-Chain Abuse;Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_4062,,
+J068,1,J,195,1fcdf3d740292cbb75f7f7af152aedce,ASB04_002410,mixed_unresolved,MalSkillBench,,FAMILY_1490,,
+J069,1,J,2537,e80fb84d0d1c1c5e86d1831bb454695e,ASB04_003051,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation;Privilege / Tool / Authority Abuse,FAMILY_3421,,
+J070,1,J,1052,c17fac6d9303932ca99acb1e7b9d6ffc,ASB04_004286,injected,SkillHarm,,FAMILY_3047,,
+J071,1,J,2321,21c0e5bf963eb3bd70f269628489b2a3,ASB04_005256,mixed_unresolved,MalSkillBench,,FAMILY_1578,S0372,MALICIOUS
+J072,1,J,754,2f39eaec2b208649c38ff700693337d5,ASB04_005640,test_fixture,AgentTrap,,FAMILY_2998,,
+J073,1,N,6945,2afabc47ad4cdfb16d8f1d7daed69ece,,skillmd_138k,skillmd_138k,,,S0286,BENIGN
+J074,1,J,554,47bda1aec38de8603611d8eccd97a142,ASB04_003429,test_fixture,AgentTrap,Data Exfiltration / Disclosure,FAMILY_2981,,
+J075,1,J,1748,fb1face993cd0686a25a03e576ffac9a,ASB04_000317,mixed_unresolved,MalSkillBench,,FAMILY_1607,,
+J076,2,J,904,4bce2ea21a9091aa08c8ed47b8978462,ASB04_003298,injected,SkillHarm,,FAMILY_3245,,
+J077,2,J,1624,9f6e65fd5a4e0cdc7fa071abbc09ef10,ASB04_001175,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_3934,,
+J078,2,J,3000,99a9a063ff534ca587214f960b18411b,ASB04_005963,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4066,,
+J079,2,J,1583,94046f1db5c3f7037405688498c3abe4,ASB04_006494,injected,SkillHarm,,FAMILY_3152,,
+J080,2,P,774,cf71e9cf00112a82c4c093169f701265,ASB04_001244,synthetic,SkillFortifyBench,,FAMILY_4542,S0210,MALICIOUS
+J081,2,P,2814,32fb8b640cd40f688a72fee9b2795921,ASB04_005499,mixed_unresolved,MalSkillBench,,FAMILY_2817,S0328,MALICIOUS
+J082,2,J,1138,30fb285499be8f6ee6f02145dc343114,ASB04_001061,injected,SkillHarm,,FAMILY_3227,,
+J083,2,J,1200,a88412748504578c6f95e1501728f83d,ASB04_004393,injected,SkillHarm,,FAMILY_3087,,
+J084,2,J,894,7e7c70e446343dd757bb7d89d9d53a04,ASB04_003094,injected,SkillHarm,,FAMILY_3223,S0135,BENIGN
+J085,2,J,1625,9a31990a882573917b8aacfc6bbc7e83,ASB04_005822,injected,SkillTrustBench,Dependency / Supply-Chain Abuse;Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3855,,
+J086,2,N,16880,3ad123edf9e8d96d9c063f5645a1629c,,skillmd_138k,skillmd_138k,,,S0172,BENIGN
+J087,2,J,2736,0dd60d98b09837f886160332d48806fc,ASB04_005029,mixed_unresolved,MalSkillBench,,FAMILY_1405,,
+J088,2,J,2661,81b41e721896be773ba36196d3499b98,ASB04_006264,mixed_unresolved,MalSkillBench,,FAMILY_2812,S0075,MALICIOUS
+J089,2,J,2587,784f7347b9c5a40f1eabdda2ddc2ce73,ASB04_004436,injected,SkillTrustBench,Dependency / Supply-Chain Abuse;Execution / Code Delivery,FAMILY_3813,,
+J090,2,J,1140,650532053e9b18c26ecbf57ce2a0dca4,ASB04_006809,injected,SkillHarm,Instruction / Goal / Memory Manipulation,FAMILY_3053,,
+J091,2,N,16559,2556c00c56bdde7a346426e0e942c8f5,,skillmd_138k,skillmd_138k,,,S0371,BENIGN
+J092,2,J,971,edb6efb325a978b6f489ab0d6621be6b,ASB04_000518,injected,SkillSafetyBench,Discovery / Reconnaissance;Instruction / Goal / Memory Manipulation,FAMILY_4584,,
+J093,2,J,2755,b23bc31665e3efa34b70920e882b1f7d,ASB04_004529,mixed_unresolved,MalSkillBench,Persistence / Control,FAMILY_0817,,
+J094,2,J,2957,720a8a4bb392f922c3e1ff47e4e99805,ASB04_004696,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3314,,
+J095,2,J,1677,3c2849ac4c5564c71cde15f2fe648d4a,ASB04_000222,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_3760,,
+J096,2,J,2461,32df22b27c3383c667f24e7fced9e79f,ASB04_000417,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_4289,S0107,MALICIOUS
+J097,2,J,618,19dee6ca3cfcfef84968faeba37d67da,ASB04_003390,test_fixture,AgentTrap,Instruction / Goal / Memory Manipulation,FAMILY_2985,,
+J098,2,J,2484,c5859321b332cc6e17a801795d42666c,ASB04_005570,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3389,,
+J099,2,N,11121,3060b80dce9bb3832cfabc79e3a6b887,,skillmd_138k,skillmd_138k,,,S0041,BENIGN
+J100,2,J,1193,5b198fe3f20b5c2ca9160bd6602bab50,ASB04_001281,injected,SkillHarm,,FAMILY_3180,,
+J101,2,J,2365,7ba35cb342f55a22c93cb352a4f1f311,ASB04_000114,mixed_unresolved,MalSkillBench,Integrity / Output Manipulation,FAMILY_2570,,
+J102,2,J,1006,748c7ec5df8999cb42d81b78fa9a96d5,ASB04_000983,wild,Agent Skill Malware,,FAMILY_2928,,
+J103,2,P,507,e093bc066a43b5e873acda615087fa16,ASB04_004249,synthetic,SkillFortifyBench,,FAMILY_4531,S0154,MALICIOUS
+J104,2,J,1297,dc78c04836c2f0d040c5d887d8db7f82,ASB04_004742,injected,SkillHarm,,FAMILY_3218,,
+J105,2,P,1202,d460f33e964bb21e1276832fc41da910,ASB04_006989,mixed_unresolved,MalSkillBench,,FAMILY_0201,S0437,MALICIOUS
+J106,2,J,2213,ef33ae42cce218a4ffc47c5debf0cb90,ASB04_003443,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_3852,,
+J107,2,N,1238,89d670d8d380707860917f30a2f712ef,,skillmd_138k,skillmd_138k,,,S0165,BENIGN
+J108,2,J,2895,73410ca17bd9cdd23274c68761f894e7,ASB04_004089,mixed_unresolved,MalSkillBench,,FAMILY_0807,,
+J109,2,J,1150,570b96259d25ec1b151fbfa47d1b6c6e,ASB04_002853,injected,SkillHarm,,FAMILY_3244,,
+J110,2,J,1211,fb4b03499f73f20d0436e6176ba1a20c,ASB04_006268,injected,SkillHarm,,FAMILY_3072,,
+J111,2,J,1090,364c979bbe2892a0aef4270766abe697,ASB04_000683,injected,SkillSafetyBench,Dependency / Supply-Chain Abuse,FAMILY_4582,S0405,BENIGN
+J112,2,J,1463,7f4e9d461981b207da7df9096e6904a3,ASB04_000140,injected,SkillHarm,,FAMILY_3226,,
+J113,2,J,1105,93a6e742f98c40735c3d5ef9a80e64c5,ASB04_002030,injected,SkillHarm,,FAMILY_3167,,
+J114,2,J,2352,de6174729a3c3d17e624f83ce7cfc9c6,ASB04_000504,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_3730,,
+J115,2,J,818,62168255330b00d55580447b142f4b94,ASB04_003495,injected,SkillHarm,,FAMILY_3258,,
+J116,2,J,2784,d58ed579850c44bb5b913b27e941c996,ASB04_002187,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4156,,
+J117,2,P,964,413480e34ec9d114205b048c48245b85,ASB04_004854,mixed_unresolved,MalSkillBench,,FAMILY_1968,S0350,MALICIOUS
+J118,2,P,2444,9b8eca94aff93a1ea3280e0903126715,ASB04_000599,mixed_unresolved,MalSkillBench,,FAMILY_1873,S0048,MALICIOUS
+J119,2,J,903,74fded782d8b28bba40ca64fa4d99df5,ASB04_002367,injected,SkillSafetyBench,Integrity / Output Manipulation,FAMILY_4579,S0324,BENIGN
+J120,2,J,650,98d4d3fdbb7c1dc5d9f1c45a01467a30,ASB04_005596,test_fixture,AgentTrap,Integrity / Output Manipulation,FAMILY_2991,,
+J121,2,J,1056,da625060d3683a9fa19ac9b3b3c79e26,ASB04_002761,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_3736,,
+J122,2,J,1518,be6760f6d262a4c752c089411940c44a,ASB04_000332,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_4329,S0363,MALICIOUS
+J123,2,J,1495,4a6733ba69854bb13cf53f7c2b7cdecd,ASB04_004867,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_3643,,
+J124,2,J,3000,4d06912e8e372868bd966979ee898543,ASB04_004334,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_4422,,
+J125,2,J,2514,d100b59e4f83f609aa00fcdf470b3726,ASB04_003531,mixed_unresolved,MalSkillBench,,FAMILY_0279,,
+J126,2,P,701,acd2d804bfc0a87703dc1002229da309,ASB04_003636,synthetic,SkillFortifyBench,,FAMILY_4527,S0151,MALICIOUS
+J127,2,N,5871,30544854b1235bbe7614c430d3ab234b,,skillmd_138k,skillmd_138k,,,S0402,BENIGN
+J128,2,J,1910,83bb090abdad8fba49b218ccce1f6f2b,ASB04_002022,injected,SkillTrustBench,Execution / Code Delivery;Instruction / Goal / Memory Manipulation,FAMILY_3996,,
+J129,2,N,23313,0600278bebd0ace85dd587ecc1e193cf,,skillmd_138k,skillmd_138k,,,S0389,BENIGN
+J130,2,J,1609,af17534e6684b41c37190e41e2a31feb,ASB04_000377,injected,SkillHarm,,FAMILY_3128,,
+J131,2,J,2327,cc72e1d35373a0b04cb437ae43bc3ac0,ASB04_003244,mixed_unresolved,MalSkillBench,Execution / Code Delivery,FAMILY_0386,,
+J132,2,J,1726,d2cc0e5439d0a925944df812d4cd1af0,ASB04_004891,injected,SkillHarm,Resource / Availability Abuse,FAMILY_3236,,
+J133,2,J,2310,dc0a9ec4dc6befb93a88a51484a03a0a,ASB04_002246,injected,SkillTrustBench,Execution / Code Delivery,FAMILY_3411,,
+J134,2,J,1985,d2ed141b339256d1b39aa1d6bb5b47c1,ASB04_001282,injected,SkillSafetyBench,Dependency / Supply-Chain Abuse,FAMILY_4586,,
+J135,2,J,2191,c50039dc005954e1dcc001a328ea9817,ASB04_004318,mixed_unresolved,MalSkillBench,,FAMILY_1785,,
+J136,2,J,1334,6f4c8c3df63206927f744cf266f07b0a,ASB04_002712,injected,SkillHarm,,FAMILY_3207,,
+J137,2,J,2187,469f762e00c41cdd77adce94e5a02317,ASB04_002984,injected,SkillHarm,,FAMILY_3028,,
+J138,2,J,1964,a0d9ce98cfc7b001037189ef5c6fd1ab,ASB04_005220,mixed_unresolved,MalSkillBench,,FAMILY_1812,,
+J139,2,J,1560,00a01490f377e1abcf4118d94ac32d96,ASB04_000310,injected,SkillHarm,,FAMILY_3168,,
+J140,2,J,1366,5541a641c510e98b5adbb6231fb35133,ASB04_003960,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_3315,,
+J141,2,J,2956,24c9c6b2f6afad272699f031fb0bbb6b,ASB04_001630,wild,MaliciousAgentSkillsBench,Credential Access;Execution / Code Delivery;Instruction / Goal / Memory Manipulation;Privilege / Tool / Authority Abuse,FAMILY_0128,,
+J142,2,J,879,a6f61c2b7404528d5cba317afe7f150b,ASB04_005818,injected,SkillHarm,,FAMILY_3038,,
+J143,2,N,2225,219ed55db55f75602b91a680c7dcd6e6,,skillmd_138k,skillmd_138k,,,S0053,BENIGN
+J144,2,J,2370,8d3a5aa0e95ee5143ad2376fa77e075b,ASB04_000269,injected,SkillTrustBench,Execution / Code Delivery;Privilege / Tool / Authority Abuse,FAMILY_4073,,
+J145,2,J,1624,b470b1491074a5626eb8b1d2cd0c3ea7,ASB04_002607,mixed_unresolved,MalSkillBench,,FAMILY_1491,,
+J146,2,J,805,5b6a4d7cfb1d75ba60349574f7d02fec,ASB04_003058,injected,SkillHarm,,FAMILY_3254,,
+J147,2,J,2889,5922a11ed0b19605915eda39b73213d9,ASB04_002913,injected,SkillTrustBench,Dependency / Supply-Chain Abuse;Execution / Code Delivery,FAMILY_4103,,
+J148,2,N,11136,19ef68c006f2842784794980dcd23b83,,skillmd_138k,skillmd_138k,,,S0442,BENIGN
+J149,2,J,2895,e4f60822687968de6a44077e9181c405,ASB04_005117,wild,MaliciousAgentSkillsBench,Credential Access,FAMILY_0146,,
+J150,2,J,2452,34b0eb3eea00a22c22e07b8533c2f170,ASB04_007163,mixed_unresolved,MalSkillBench,Execution / Code Delivery,FAMILY_0358,,

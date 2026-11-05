@@ -1,0 +1,7 @@
+model,arm,attack,reader,verdict,n
+gpt-4o-mini,ben,clean,skillgate,MALICIOUS,354
+gpt-4o-mini,ben,clean,skillgate,SAFE,2629
+gpt-4o-mini,ben,clean,trunc10k,MALICIOUS,51
+gpt-4o-mini,ben,clean,trunc10k,SAFE,1449
+gpt-4o-mini,ben,clean,trunc12k,MALICIOUS,54
+gpt-4o-mini,ben,clean,trunc12k,SAFE,1446
