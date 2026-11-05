@@ -1,23 +1,68 @@
-# What the Judge Never Sees — research artifact
+<div align="center">
 
-Artifact for the paper *What the Judge Never Sees: Context-Window Evasion of LLM Skill
-Scanners and the Limits of Windowed Defenses.*
+# What the Judge Never Sees
+
+**Context-window evasion of LLM skill scanners, and the limits of windowed defenses**
+
+[![license](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+[![data](https://img.shields.io/badge/data-CC--BY--4.0-4c1.svg)](#licence)
+[![python](https://img.shields.io/badge/python-3.14%20tested-3776AB.svg)](#quick-start)
+[![review](https://img.shields.io/badge/review-double--blind-lightgrey.svg)](#anonymity)
+[![model calls](https://img.shields.io/badge/model%20calls-none%20needed-4c1.svg)](#quick-start)
+
+Research artifact: the per-item tables behind every number in the paper, the scripts that
+derive each number from them, and both label audits — including the human audit that
+corrects the paper's headline claim downward.
+
+**Every number recomputes offline. No API key, no model call, no network.**
+
+</div>
+
+---
 
 Agent "skills" are a natural-language `SKILL.md` plus bundled scripts, installed from public
-marketplaces and screened by LLM-based scanners. This artifact holds the per-item result
-tables behind every number in the paper, the scripts that derive each number from those
-tables, and the two label audits the paper's claims rest on — including the human audit of
-the never-caught stratum.
+marketplaces and screened by LLM-based scanners. The paper's first result needs no attack to
+reach it, and this artifact is how you check it.
 
-> **Anonymous submission.** This tree is de-identified for double-blind review: absolute
-> paths are rewritten to `.`, and the build refuses to emit a tree in which any identifying
-> token survives. Please do not try to attribute it.
+| | under the benchmark's labels | after the human audit |
+|---|---|---|
+| malicious skills in the pool | 1124 | 668 |
+| missed by **both** the LLM judge and the static scanner | 631 (56%) | 199 |
+| **joint-miss floor** | 0.561 | **0.298** `[0.242, 0.353]` |
+| disjunction recall | 0.439 | 0.702 |
+| errors correlated beyond independence | Fisher *p* = 9e-22 | **withdrawn** — *p* runs 0.00043 to 0.80 |
+
+The audit is the point. A random 120 of the 631 were re-read by a person, blind to stratum,
+provenance, upstream label and attack category, with two control strata to measure the
+reader rather than the corpus. Both controls came back clean (0/15 and 0/15), and **78 of
+the 114 items that got a definite verdict are benign** — 0.684 `[0.594, 0.762]`. The floor
+survives that correction; one of the paper's claims does not, and the artifact carries the
+sensitivity analysis that killed it.
+
+```
+                    1124 malicious skills, nothing attacked
+                                     |
+                 +-------------------+-------------------+
+            LLM judge                              static scanner
+                 +-------------------+-------------------+
+                                     |
+                         631 missed by both  (56%)
+                                     |
+                       random sample of 120, blinded
+                                     |
+                 human audit  --  2 control strata, 0/15 and 0/15
+                                     |
+                      78 of 114 benign  =  0.684 [0.594, 0.762]
+                                     |
+                     corrected floor  0.298 [0.242, 0.353]
+```
 
 ---
 
 ## Quick start
 
-Nothing here calls a model. Every number in the paper is recomputed from the shipped CSVs.
+`pandas` is the only hard dependency of the scoring scripts. Run them **from the repository
+root**; the paths are relative to it.
 
 ```bash
 python -I scripts/v3_jointmiss_audit_score.py     # the human audit and the corrected floor
@@ -26,20 +71,25 @@ python -I scripts/v2_label_robustness.py          # the multiply-caught restrict
 python -I scripts/v2_orgeom_indep.py              # the two-geometry independence table
 ```
 
-Run them **from the repository root**: the paths are relative to it. `pandas` is the only
-hard dependency for the scoring scripts; fetching the corpora additionally needs
-`huggingface_hub` and `pyarrow`.
-
-The first script is the one to run if you only run one. It refuses to report anything
-unless the paper's eight published baseline figures reproduce exactly from the shipped
-table, and it prints that check first:
+Run the first one if you only run one. It refuses to report anything unless the paper's
+eight published baseline figures reproduce exactly from the shipped table, and it prints
+that check before anything else:
 
 ```
-| pool n                          | 1124 | 1124 |
-| missed by both                  |  631 |  631 |
-| OR recall                       | 0.439 | 0.439 |
-...
+| quantity         | paper | recomputed |
+| pool n           |  1124 |       1124 |
+| caught by both   |   152 |        152 |
+| missed by both   |   631 |        631 |
+| OR recall        | 0.439 |      0.439 |
+| Fisher exact p   | 9e-22 |      9e-22 |
+
 Baseline reproduces: **True**
+```
+
+Fetching the corpora additionally needs `huggingface_hub` and `pyarrow`:
+
+```bash
+python -I scripts/acquire_data.py     # MaliciousSkillBench, and a bounded SkillMD-138K sample
 ```
 
 ---
@@ -48,7 +98,7 @@ Baseline reproduces: **True**
 
 | Paper claim | Script | Data |
 |---|---|---|
-| Joint-miss floor: 631 of 1124 under the benchmark's labels; **0.298 [0.242, 0.353]** after the human audit; the withdrawn error correlation and its sensitivity table | `scripts/v3_jointmiss_audit_score.py` | `research_notes/v2_main/v2_layering_items.csv`, `audit_jointmiss/sheet_human.csv` |
+| Joint-miss floor: 631 of 1124 under the benchmark's labels, **0.298** `[0.242, 0.353]` after the audit, and the withdrawn error correlation with its sensitivity table | `scripts/v3_jointmiss_audit_score.py` | `research_notes/v2_main/v2_layering_items.csv`, `audit_jointmiss/sheet_human.csv` |
 | How the human audit packet was drawn and blinded (seed 631) | `scripts/v3_jointmiss_audit_pack.py` | `audit_jointmiss/key/key.csv` |
 | Layering recall and false-positive rates for the judge, Cisco Skill Scanner and skillfrisk | `scripts/v2_layering.py` | `research_notes/v2_main/v2_layering_items.csv` + `_benign_aggregate/` |
 | 450-item label audit: the disputed share of the caught set, agreement, the syntactic floor | `scripts/v2_phase5_audit_score.py` | `audit/` |
@@ -65,45 +115,54 @@ Baseline reproduces: **True**
 ## Layout
 
 ```
-scripts/                     57 scripts; the analysis scripts read only the CSVs here
-research_notes/v2_main/      per-item tables for the main measurement
-  _benign_aggregate/         the benign arm, as counts (see below)
-research_notes/pilot/        the earlier pilot measurements
-followup_results/            the content-addressed geometry and the judge panel
-audit/                       the 450-item label audit: items, key, rubric, both passes
-audit_jointmiss/             the 150-item human audit: items, key, filled sheet
-data/checksums.txt           SHA-256 of the two corpora, which are fetched, not shipped
+.
+|-- scripts/                     57 scripts; the analysis scripts read only the CSVs here
+|-- research_notes/
+|   |-- v2_main/                 per-item tables for the main measurement
+|   |   `-- _benign_aggregate/   the benign arm, as counts -- see "What is withheld"
+|   `-- pilot/                   the earlier pilot measurements
+|-- followup_results/            the content-addressed geometry and the judge panel
+|-- audit/                       the 450-item label audit: items, key, rubric, both passes
+|-- audit_jointmiss/             the 150-item human audit: items, key, filled sheet
+`-- data/checksums.txt           SHA-256 of the two corpora, which are fetched, not shipped
 ```
 
 `research_notes/` keeps its working name so that no script path had to be rewritten beyond
-the project root; it holds result tables, not notes.
+the project root. It holds result tables, not notes.
 
 ---
 
-## What is deliberately withheld
+## What is withheld
 
 Three things, each for a stated reason rather than by oversight.
 
-**1. The benign arm's per-item rows.** A benign row names a real third-party skill that a
-detector flagged in error, and a per-skill false-positive label is a lasting accusation
-against code whose authors are not participants in this study. Every table ships its
-malicious rows unchanged; the benign rows are in `_benign_aggregate/` as counts over an
-allowlist of design factors and verdict columns. The counts keep every false-positive rate
-and interval in the paper reachable — summing `v2_layering_items.csv` over rows where all
-three scanners returned a usable verdict gives n = 400 and the five published rates,
-0.050 / 0.043 / 0.087 / 0.085 / 0.130 — and `_benign_aggregate/README.md` shows that
-calculation. What is gone is the mapping from skill to verdict. The benign corpus is public
-and every judge is named and pinned, so a determined reader can reconstruct it by
-re-issuing the calls; we decline to ship it ready-made.
-
-**2. Stratum B of the label audit**, which is those same 77 flagged benign skills: 373 of
-the 450 items ship, and the stratum-B rows are removed from the key and from both annotation
-passes. The paper's finding about that stratum is a single aggregate — none of the 77 was
-judged malicious, so all 24 false-positive cells stand.
-
-**3. The de-identification term list** (`scripts/_deident_terms.py`), because it is the
-authors' names. `scripts/build_artifact.py` ships and shows exactly what was rewritten and
-what the build refused to emit; re-running it needs a term list of your own.
+<table>
+<tr><th align="left">What</th><th align="left">Why, and what replaces it</th></tr>
+<tr>
+<td><b>The benign arm's<br>per-item rows</b></td>
+<td>A benign row names a real third-party skill that a detector flagged in error, and a
+per-skill false-positive label is a lasting accusation against code whose authors are not
+participants in this study. Every table ships its malicious rows unchanged; the benign rows
+are in <code>_benign_aggregate/</code> as counts over an <i>allowlist</i> of design factors
+and verdict columns, so no per-skill column can survive by being overlooked. The counts keep
+every published rate reachable: summing <code>v2_layering_items.csv</code> over rows where
+all three scanners returned a usable verdict gives n = 400 and
+0.050 / 0.043 / 0.087 / 0.085 / 0.130, the five rates in the paper.
+<code>_benign_aggregate/README.md</code> shows that calculation.</td>
+</tr>
+<tr>
+<td><b>Stratum B of the<br>label audit</b></td>
+<td>The same 77 flagged benign skills. 373 of the 450 items ship; stratum B is removed from
+the key and from both annotation passes. The paper's finding about that stratum is a single
+aggregate: none of the 77 was judged malicious, so all 24 false-positive cells stand.</td>
+</tr>
+<tr>
+<td><b>The de-identification<br>term list</b></td>
+<td><code>scripts/_deident_terms.py</code>, because it is the authors' names.
+<code>scripts/build_artifact.py</code> ships and shows exactly what was rewritten and what
+the build refused to emit; re-running it needs a term list of your own.</td>
+</tr>
+</table>
 
 Nothing else is held back. The malicious items ship with their text, the audit sheets with
 their verdicts and evidence quotes, and the human audit with its filled sheet, its blank
@@ -111,42 +170,36 @@ template and its unblinding key.
 
 ---
 
-## The corpora
+## Anonymity
 
-Both are CC-BY-4.0 and are fetched rather than redistributed — one of the two parquet files
-is 560 MB, past GitHub's per-file limit.
-
-```bash
-python -I scripts/acquire_data.py     # MaliciousSkillBench, and a bounded SkillMD-138K sample
-```
-
-`data/checksums.txt` carries the SHA-256 and byte length of each file as measured, so you
-can confirm you fetched what was measured. Most scoring scripts need no corpus at all; the
-packet builders and the readers do.
+This tree is de-identified for double-blind review. Absolute paths are rewritten to `.`, the
+two non-ASCII result directories are renamed, and `scripts/build_artifact.py` re-scans its
+own output for identifying tokens in file contents *and* in paths, exiting non-zero rather
+than leaving a tree that leaks. Please do not try to attribute it.
 
 ---
 
 ## Known gaps, stated rather than left to be found
 
-- **`audit/rubric_ko.md` and `audit_jointmiss/GUIDE_ko.md` are in Korean.** These are the
-  two audit instruments as actually administered, so they ship unaltered rather than
-  paraphrased. An English translation is not yet included; the original remains
-  authoritative if one is added.
-- **`scripts/v2_final_recompute.py` section 5 is a v2 computation.** It builds the
-  two-geometry table with the `skillgate` reader, which is the **mistaken half window
-  width** the paper corrects. The published table uses the width-corrected `regex_real`
-  reader in `followup_results/exp2_cells.csv`. The two agree closely on two of the five
-  judges and differ on the others, so a wrong-reader run looks plausible; gate any
-  recomputation on reproducing the published cells
-  (165/14/19/26, 120/19/9/20, 120/8/10/30, 92/24/5/23, 58/5/2/9) before trusting it.
-  `scripts/v2_orgeom_indep.py` is the correct entry point.
-- **The pilot tables in `research_notes/pilot/` are superseded.** They are included because
-  the paper reports a correction to its own earlier measurement, and that correction is only
-  checkable against them.
+- **`audit/rubric_ko.md` and `audit_jointmiss/GUIDE_ko.md` are in Korean.** These are the two
+  audit instruments as actually administered, so they ship unaltered rather than paraphrased.
+  An English translation is not yet included; if one is added, the original stays
+  authoritative.
+- **`scripts/v2_final_recompute.py` section 5 is a superseded computation.** It builds the
+  two-geometry table with the `skillgate` reader, which is the *mistaken half window width*
+  the paper corrects. The published table uses the width-corrected `regex_real` reader in
+  `followup_results/exp2_cells.csv`. The two agree closely on two of the five judges and
+  differ on the others, so a wrong-reader run looks plausible: gate any recomputation on
+  reproducing the published cells (`165/14/19/26`, `120/19/9/20`, `120/8/10/30`,
+  `92/24/5/23`, `58/5/2/9`) before trusting it. `scripts/v2_orgeom_indep.py` is the correct
+  entry point.
+- **The pilot tables in `research_notes/pilot/` are superseded.** They ship because the paper
+  reports a correction to its own earlier measurement, and that correction is only checkable
+  against them.
 - **Per-window verdicts were not stored** for the two readers of the main measurement; both
   OR in memory and discard. Offline re-aggregation at a different threshold is therefore
-  possible for the contiguity gate, which was re-scored for that purpose, and not for the
-  v2 readers.
+  possible for the contiguity gate, which was re-scored for that purpose, and not for the v2
+  readers.
 
 ---
 
@@ -154,11 +207,12 @@ packet builders and the readers do.
 
 | What | Terms |
 |---|---|
-| `scripts/` | MIT, see `LICENSE` |
+| `scripts/` | MIT, see [`LICENSE`](LICENSE) |
 | the result tables under `research_notes/` and `followup_results/`, and the audit sheets and keys | CC-BY-4.0 |
 | the corpus items under `audit/items` and `audit_jointmiss/items` | CC-BY-4.0, from MaliciousSkillBench and SkillMD-138K, redistributed under those terms with attribution |
 
-The copyright line in `LICENSE` reads `The Authors` for the duration of anonymous review
-and is replaced with the named authors in the archival release.
+The copyright line in `LICENSE` reads `The Authors` for the duration of anonymous review and
+is replaced with the named authors in the archival release.
 
-Skill text in this artifact is inert data: nothing here executes it, and neither should you.
+> **Skill text in this artifact is inert data.** Nothing here executes it, and neither should
+> you.
