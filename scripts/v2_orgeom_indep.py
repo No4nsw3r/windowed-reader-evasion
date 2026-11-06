@@ -1,6 +1,29 @@
-"""Recompute the two-geometry table honestly.
+"""The v2 record of the two-geometry table, AT THE SUPERSEDED WINDOW WIDTH.
 
-The paper reports the OR of the regex reader and the uncapped partition as "45 discordant
+DO NOT RUN THIS TO CHECK THE PUBLISHED TABLE. Use scripts/v3_orgeom_verify.py, which
+gates itself on reproducing the published cells before it prints anything.
+
+This script reads `reader == "skillgate"` in v2_skillgate_items.csv, which is the regex
+geometry at the *mistaken half width* -- 500 characters per window in total rather than
+500 on each side of a regex hit. The paper corrects that width, and its two-geometry
+table is at the corrected one: `reader == "regex_real"` in
+followup_results/exp2_cells.csv, whose cells are 165/14/19/26, 120/19/9/20, 120/8/10/30,
+92/24/5/23 and 58/5/2/9. What this script prints instead is 165/18/19/26 and
+120/13/13/16, and its closing line reports the regex reader catching 50 artifacts the
+partition passes where the paper publishes 45. The two readers agree closely on some
+judges and differ on others, so a wrong-reader run looks plausible rather than broken,
+which is how it survived.
+
+It is kept, and kept at this reader, because it is the only place besides section 5 of
+v2_final_recompute.py that reproduces the pre-correction column the paper quotes: on
+qwen3:8b the two geometries tie here at exactly 0.242 against 0.242, which is the
+"at the mistaken half width the two had tied exactly" of the window-width appendix.
+Correcting the reader would erase that and duplicate v3_orgeom_verify.py.
+
+The argument below is likewise a v2-era one, against a sentence the paper no longer
+makes. Read it as history.
+
+The paper reported the OR of the regex reader and the uncapped partition as "45 discordant
 items, no reversals" with an exact McNemar p. That test is empty: flagging on either
 reader can only ADD flags, so the cell counting reversals is structurally zero and
 McNemar on it is a one-sided binomial against an impossible alternative. Worse, the
@@ -75,6 +98,8 @@ def fisher_two_sided(a, b, c, d):
 def verdicts(model):
     """(regex dict, partition dict) keyed by skill hash, SAFE/MALICIOUS only."""
     sg = pd.read_csv(os.path.join(N, "v2_skillgate_items.csv"), dtype={"skill_hash": str})
+    # "skillgate" = the mistaken half width, deliberately; see the module docstring. The
+    # published table is at `reader == "regex_real"` in followup_results/exp2_cells.csv.
     r = sg[(sg.model == model) & (sg.arm == "mal") & (sg.attack == ATK) &
            (sg.reader == "skillgate") & sg.verdict.isin(GOOD)]
     fp, mcol = PARTITION[model]
@@ -120,6 +145,8 @@ for m in ORDER:
         p_readers=binom_two_sided(sm, ms),
         drop_vs_best=round(max(pr, pp) - po, 3)))
 
+print("THE MISTAKEN HALF WIDTH -- the v2 record, not the published table. "
+      "For that: scripts/v3_orgeom_verify.py")
 print(f"{'judge':30} {'n':>4} {'regex':>6} {'part':>6} {'OR':>6} "
       f"{'bothS':>6} {'rOnly':>6} {'pOnly':>6} {'expBoth':>8} "
       f"{'p_indep':>9} {'p_rdrs':>8} {'drop':>6}")
@@ -139,8 +166,9 @@ print("p_rdrs  = exact McNemar, regex vs partition (a real paired test)")
 print()
 tot_r = sum(r["regex_only"] for r in rows)
 tot_p = sum(r["part_only"] for r in rows)
-print(f"Across judges: the partition catches {tot_r} artifacts the regex reader passes, "
-      f"and the regex reader catches {tot_p} the partition passes.")
+print(f"Across judges, at the mistaken half width: the partition catches {tot_r} "
+      f"artifacts the regex reader passes, and the regex reader catches {tot_p} the "
+      f"partition passes. At the corrected width the paper publishes 70 and 45.")
 print("Neither reader's miss set contains the other's, which is why the OR helps; but "
       "both-SAFE exceeds the independence prediction on every judge, so the two do NOT "
       "fail orthogonally -- they share a common difficulty and the OR only recovers the "

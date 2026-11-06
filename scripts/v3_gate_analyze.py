@@ -3,7 +3,12 @@
 Reads the per-window scores scripts/v3_gate_score.py wrote and reports:
 
   0  reproduction - OR over our per-window LABELS against the published cell verdicts in
-                    v2_phase1_items.csv. Nothing below is trusted until this matches.
+                    v2_phase1_items.csv, for the cells whose published row ships. In the
+                    released artifact that is the malicious arm only: the benign arm's
+                    per-item rows are withheld and its window records carry surrogate
+                    ids, so they cannot be joined. The section says which cells it
+                    covered, and nothing else here depends on the join -- completeness
+                    and theta_b both come from the window cache itself.
   1  the score distribution - whether a generative judge produces any sub-threshold signal
                     for the gate to accumulate. This is the empirical core of the question.
   2  theta_b       - calibrated on the BENIGN arm at the 99th percentile, as PO calibrates it
@@ -112,20 +117,35 @@ def main():
     flag = float(sys.argv[1]) if len(sys.argv) > 1 else FLAG
     cells, bad = load()
 
-    pub = pd.read_csv(PUB, dtype={"skill_hash": str})
-    pub = pub[pub.model == "gpt-4o-mini"]
-    pubv = {(str(r.arm), str(r.skill_hash), str(r.attack), str(r.defense)):
-            (str(r.verdict), int(r.n_windows))
-            for r in pub.itertuples(index=False)}
+    # The published verdicts serve only the reproduction check of section 0, and they do
+    # not all ship. The artifact withholds the benign arm's per-item rows and replaces the
+    # benign skill_hash in the window cache with a surrogate, so no benign cell can be
+    # joined against v2_phase1_items.csv at all. Taking the expected window count from
+    # there used to drop every benign cell, which left theta_b -- a percentile over the
+    # benign arm -- uncomputable, and the script died on it mid-report. Completeness comes
+    # from the cache instead, which carries n_windows on every window. The two counts agree
+    # on every cell (3182 cells, 11651 benign and 10088 malicious windows), so this changes
+    # no number; it is what lets the benign arm survive the withholding.
+    pubv = {}
+    if os.path.exists(PUB):
+        pub = pd.read_csv(PUB, dtype={"skill_hash": str})
+        pub = pub[pub.model == "gpt-4o-mini"]
+        pubv = {(str(r.arm), str(r.skill_hash), str(r.attack), str(r.defense)):
+                (str(r.verdict), int(r.n_windows))
+                for r in pub.itertuples(index=False)}
 
-    # complete cells only: every window present
+    # complete cells only: every window present, against the cache's own n_windows
     full = {}
     partial = 0
     for k, w in cells.items():
-        want = pubv.get(k, (None, None))[1]
-        if want is None:
-            continue
-        if len(w) == want and set(w) == set(range(want)):
+        want = {r.get("n_windows") for r in w.values()}
+        try:
+            want = int(want.pop()) if len(want) == 1 else -1
+        except (TypeError, ValueError):
+            want = -1
+        if want <= 0:                       # no usable count: not a complete cell
+            partial += 1
+        elif len(w) == want and set(w) == set(range(want)):
             full[k] = [w[i] for i in range(want)]
         else:
             partial += 1
@@ -140,12 +160,13 @@ def main():
 
     # ---- 0. reproduction --------------------------------------------------
     say("## 0. Reproduction: OR over our per-window labels vs the published verdicts\n")
-    agree = dis = 0
+    agree = dis = unjoined = 0
     examples = []
     for k, ws in full.items():
         mine = "MALICIOUS" if any(w.get("label") == "MALICIOUS" for w in ws) else "SAFE"
-        theirs = pubv[k][0]
+        theirs = pubv.get(k, (None, None))[0]
         if theirs not in ("SAFE", "MALICIOUS"):
+            unjoined += 1              # no published row ships for this cell
             continue
         if mine == theirs:
             agree += 1
@@ -153,8 +174,16 @@ def main():
             dis += 1
             if len(examples) < 8:
                 examples.append((k, mine, theirs))
-    p, lo, hi = wilson(agree, agree + dis)
-    say(f"Agreement: {agree}/{agree + dis} = {p:.4f} [{lo:.4f}, {hi:.4f}].\n")
+    if agree + dis == 0:
+        say(f"Not checkable here: none of the {len(full)} complete cells has a published "
+            f"verdict to compare against. The benign arm's per-item rows are withheld "
+            f"and its window records carry surrogate ids, so they cannot be joined.\n")
+    else:
+        p, lo, hi = wilson(agree, agree + dis)
+        say(f"Agreement: {agree}/{agree + dis} = {p:.4f} [{lo:.4f}, {hi:.4f}]"
+            + (f", over the cells whose published verdict ships; {unjoined} of "
+               f"{len(full)} could not be joined (benign rows are withheld)."
+               if unjoined else ".") + "\n")
     if examples:
         say("| cell | OR of our labels | published |")
         say("|---|---|---|")
@@ -191,6 +220,13 @@ def main():
     # ---- 2. theta_b -------------------------------------------------------
     theta = pct(ben_scores, PCTL)
     say("## 2. theta_b, calibrated as Prompt Overflow calibrates it\n")
+    if theta is None:
+        say("Not computable: no benign window survived. theta_b is a percentile over the "
+            "benign arm, and sections 3 to 5 are all defined against it, so nothing "
+            "further is printed. Check that the benign records in "
+            f"{os.path.basename(CACHE)} carry an `n_windows` and an `s_norm`.\n")
+        write()
+        return 1
     say(f"99th percentile of {len(ben_scores)} benign window scores: "
         f"**theta_b = {theta:.6g}**  (PO's own value, 0.1093, is calibrated to Prompt "
         f"Guard 2's score scale and does not transfer.)\n")
@@ -288,6 +324,7 @@ def main():
         say("```")
     say()
     write()
+    return 0
 
 
 def write():
@@ -297,4 +334,4 @@ def write():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

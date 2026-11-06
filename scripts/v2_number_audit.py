@@ -11,7 +11,8 @@ Blocks:
   2  tab:cost - all four rows, including the 1,443 denominator that dedup_lmax has
      because 57 benign artifacts overflow it
   3  window counts under attack - 12.5 over the six padding-family attacks, 33.4 at 50k
-  4  the regex reader's two benign draws - 1,484 and 1,499 with Wilson intervals
+  4  the regex reader's two benign draws at the original window width - 1,484 and 1,499
+     with Wilson intervals
   5  the screening draw - the last caught position for each of the four screened judges
   6  small derived quantities - 1,153, 820, 16.2, 55.9%
 
@@ -90,7 +91,15 @@ chk("mean over the six padding-family attacks", 12.5,
     round(sum(per.values()) / len(per), 1))
 chk("mean under uniq_pad_50k", 33.4, round(per["uniq_pad_50k"], 1))
 
-head("4. the regex reader's two benign draws")
+head("4. the regex reader's two benign draws, at the original window width")
+# `reader == "skillgate"` is the regex geometry at the *mistaken half width*, and it is
+# the right reader here, not a defect to correct. The two figures the paper quotes for
+# these draws -- 0.108 on the 1,484 and 0.129 on the 1,499 -- are the original-width
+# ones; it states their union as 0.1187 over n = 2983 "at the original window width"
+# against 0.1012 at the corrected one, and 0.1187 is exactly
+# (0.108 * 1484 + 0.129 * 1499) / 2983. The corrected-width benign rows live under
+# `reader == "regex_real"` in followup_results/exp2_cells.csv, and repointing this block
+# at them would replace two published numbers with two different ones.
 b = sg[(sg.arm == "ben") & (sg.reader == "skillgate") &
        sg.verdict.isin(GOOD)].reset_index(drop=True)
 print("  skillgate benign rows %d, all with a verdict, split in file order" % len(b))

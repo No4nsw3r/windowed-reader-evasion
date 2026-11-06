@@ -61,7 +61,8 @@ VERDICTS = ["verdict", "llm", "cisco", "skillfrisk", "fired", "decision", "outco
 # analyses that have no script of their own.
 MD_OK = {"README.md", "exp1_distinct_looks.md", "exp2_real_geometry.md",
          "exp2_verdicts.md", "exp2_all_judges_summary.md", "exp5_reasoning_effort.md",
-         "verified_numbers.md", "v3_jointmiss_audit.md"}
+         "verified_numbers.md", "v3_jointmiss_audit.md",
+         "v3_real_ruleset.md"}
 
 BENIGN_README = """# Benign arm: aggregate counts
 
@@ -137,6 +138,44 @@ def split_arm(src, dst_dir, name):
         return len(keep), len(ben)
     agg = ben.groupby(cols, dropna=False).size().reset_index(name="n")
     agg.to_csv(os.path.join(agg_dir, name), index=False)
+    # Aggregate PREFILTER statistics for the same arm. Withholding the per-item rows left
+    # five published benign figures unverifiable from the artifact -- the three readers'
+    # firing rates and two mean selected lengths -- and `v3_artifact_integrity.py` failed
+    # on exactly those when run inside a built tree. A sum over 2983 artifacts identifies
+    # no artifact, so the sums ship and the gate recomputes the means from them. Grouped on
+    # the design factors only, never on a verdict or a hash, and written to its own file so
+    # the counts above keep the shape the published rates are read from.
+    PF = ["prompt_len", "n_hits", "n_calls", "covered"]
+    gcols = [c for c in ("judge", "model", "reader", "attack") if c in ben.columns]
+    if gcols and any(c in ben.columns for c in PF):
+        b = ben.copy()
+        # Drop ERR rows. They are not verdicts, and a cell that errored in one shard and
+        # succeeded on retry in another appears in both -- the de-duplication above runs
+        # per file and cannot see across them. Dropping ERR is also the convention the
+        # published rates use, and it is what brings every judge back to exactly 2983.
+        if "verdict" in b.columns:
+            b = b[b["verdict"] != "ERR"]
+        for c in PF:
+            if c in b.columns:
+                b[c] = pd.to_numeric(b[c], errors="coerce")
+        recs = []
+        for key, grp in b.groupby(gcols, dropna=False):
+            row = dict(zip(gcols, key if isinstance(key, tuple) else (key,)))
+            row["n"] = len(grp)
+            if "n_calls" in grp.columns:
+                row["n_fired"] = int((grp["n_calls"].fillna(0) > 0).sum())
+            if "prompt_len" in grp.columns:
+                row["sum_prompt_len"] = int(grp["prompt_len"].fillna(0).sum())
+            if "n_hits" in grp.columns:
+                h = grp["n_hits"].dropna()
+                h = h[h >= 0]                     # fullfile writes -1: no ruleset
+                row["n_hits_rows"], row["sum_n_hits"] = int(len(h)), int(h.sum())
+            if "covered" in grp.columns:
+                cv = grp["covered"].dropna()
+                row["n_covered"], row["sum_covered"] = int(len(cv)), float(cv.sum())
+            recs.append(row)
+        pd.DataFrame(recs).to_csv(
+            os.path.join(agg_dir, name.replace(".csv", ".prefilter.csv")), index=False)
     io.open(os.path.join(agg_dir, "README.md"), "w", encoding="utf-8",
             newline=chr(10)).write(BENIGN_README)
     return len(keep), len(ben)

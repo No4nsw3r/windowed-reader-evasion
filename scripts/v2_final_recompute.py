@@ -6,6 +6,20 @@ transcription rather than a judgement call. Nothing here writes to the paper.
 
 Point estimates are raw proportions, matching pilot_audit2.wilson.
 
+SECTIONS 3, 3b AND 5 ARE A FROZEN RECORD OF THE SUPERSEDED WINDOW WIDTH. They read
+`reader == "skillgate"` in v2_skillgate_items.csv, which is the regex geometry at the
+*mistaken half width* -- 500 characters per window in total rather than 500 on each side
+of a hit. That is deliberate and must not be "corrected" here. The paper reports the
+correction as a three-width sweep, and this is the only script that reproduces its first
+column: at this reader gpt-4o-mini reads clean 0.261, uniq_pad_20k 0.255,
+gap_il_4x2600 0.267, il_matched 0.285 and clean payload coverage 0.507, which are the
+500-character figures in the window-width appendix. The 1000-character column is
+`reader == "regex_real"` in followup_results/exp2_cells.csv and the 1500-character column
+is `reader == "regex_wide"` in this same file; neither belongs in these sections. Note in
+particular that section 5 is NOT the published two-geometry table even though its heading
+once said so -- use scripts/v3_orgeom_verify.py for that, which gates itself on
+reproducing the published cells exactly.
+
 usage: python -I scripts/v2_final_recompute.py
 """
 import collections
@@ -169,6 +183,7 @@ for m in JUDGES:
     if why:
         print(f"  {SHORT[m]:24} {why}")
         continue
+    # "skillgate" = the mistaken half width, on purpose; see the module docstring
     cells = {a: sg_cell(d, m, a, "skillgate") for a in ATT}
     have = {a: c for a, c in cells.items() if c}
     if not have:
@@ -181,12 +196,17 @@ for m in JUDGES:
     print(f"  {SHORT[m]:24} span {min(v):.3f}-{max(v):.3f}   "
           f"clean->uniq_pad_20k {mv:+.3f}   worst {worst}   cells {len(have)}/7")
 
-head("3b. Payload coverage under the regex reader (paper: 0.45-0.58 across judges)")
+head("3b. Payload coverage at the mistaken half width "
+     "(the v2 record: 0.45-0.58 clean across the four judges of the time)")
 for m in JUDGES:
     why = sg_unmeasured(m)
     if why:
         print(f"  {SHORT[m]:24} {why}")
         continue
+    # "skillgate" = the mistaken half width, on purpose; see the module docstring. The
+    # 0.45-0.58 span is clean coverage over the four judges measured before
+    # claude-haiku-4.5 joined (0.454, 0.507, 0.517, 0.580), and the paper's corrected
+    # figure for gpt-4o-mini, 0.692, is the regex_real reader in exp2_cells.csv.
     g = d[(d.model == m) & (d.arm == "mal") & (d.reader == "skillgate") &
           d.verdict.isin(GOOD)]
     if g.empty:
@@ -212,8 +232,10 @@ for m in JUDGES:
     print(f"  {SHORT[m]:24} clean {a['p']:.3f} (n={a['n']})  ->  "
           f"padded {b['p']:.3f} (n={b['n']})   coverage {cov:.3f}")
 
-# ============================================================ 5. tab:orgeom
-head("5. Table 4 (tab:orgeom) — the two geometries OR-ed under gap_il_4x2600")
+# ============================================================ 5. tab:orgeom, OLD WIDTH
+head("5. The two geometries OR-ed under gap_il_4x2600, AT THE MISTAKEN HALF WIDTH\n"
+     "   This is the v2 record, not the published table. For that run "
+     "scripts/v3_orgeom_verify.py.")
 print(f"{'judge':24} {'n':>4} {'regex':>6} {'part':>6} {'OR':>6} "
       f"{'onlyP':>6} {'onlyR':>6} {'both':>5} {'indep':>6} {'p_ind':>9} {'p_rdr':>7}")
 tot_p = tot_r = 0
@@ -222,6 +244,11 @@ for m in JUDGES:
     if why:
         print(f"  {SHORT[m]:22} {why}")
         continue
+    # "skillgate" = the mistaken half width, on purpose; see the module docstring. What
+    # this preserves is the v2 column the paper quotes in the width appendix -- notably
+    # qwen3:8b, where the two geometries tied exactly at 0.242/0.242 before the
+    # correction. The published cells (165/14/19/26, 120/19/9/20, 120/8/10/30,
+    # 92/24/5/23, 58/5/2/9) are at regex_real and come from v3_orgeom_verify.py.
     r = d[(d.model == m) & (d.arm == "mal") & (d.attack == "gap_il_4x2600") &
           (d.reader == "skillgate") & d.verdict.isin(GOOD)]
     q = partition(m)
@@ -243,8 +270,10 @@ for m in JUDGES:
     print(f"{SHORT[m]:24} {n_:>4} {(ss + sm) / n_:>6.3f} {(ss + ms) / n_:>6.3f} "
           f"{ss / n_:>6.3f} {sm:>6} {ms:>6} {ss:>5} {exp:>6.1f} "
           f"{fisher(ss, sm, ms, mm):>9.1g} {binom_two_sided(sm, ms):>7.2f}")
-print(f"  across judges: the partition catches {tot_p} the regex reader passes, "
-      f"the regex reader catches {tot_r} the partition passes")
+print(f"  across judges, at the mistaken half width: the partition catches {tot_p} the "
+      f"regex reader passes, the regex reader catches {tot_r} the partition passes")
+print("  (the paper's 70 and 45 are the same two sums at the corrected width; "
+      "see scripts/v3_orgeom_verify.py)")
 
 # ============================================================ 6. ASR cell count
 head("6. ASR cells behind the audit tolerance sentence (paper: 7 of 238)")

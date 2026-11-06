@@ -8,13 +8,22 @@
 [![data](https://img.shields.io/badge/data-CC--BY--4.0-4c1.svg)](#licence)
 [![python](https://img.shields.io/badge/python-3.14%20tested-3776AB.svg)](#quick-start)
 [![review](https://img.shields.io/badge/review-double--blind-lightgrey.svg)](#anonymity)
-[![model calls](https://img.shields.io/badge/model%20calls-none%20needed-4c1.svg)](#quick-start)
+[![malicious arm](https://img.shields.io/badge/malicious%20arm-recomputes%20offline-4c1.svg)](#what-recomputes-and-what-does-not)
+[![benign arm](https://img.shields.io/badge/benign%20arm-aggregates%20only-orange.svg)](#what-is-withheld)
 
-Research artifact: the per-item tables behind every number in the paper, the scripts that
-derive each number from them, and both label audits — including the human audit that
-corrects the paper's headline claim downward.
+Research artifact: the per-item tables behind the paper's malicious-arm numbers, the
+scripts that derive each number from them, and both label audits — including the human
+audit that corrects the paper's headline claim downward.
 
-**Every number recomputes offline. No API key, no model call, no network.**
+**The malicious arm recomputes offline: no API key, no model call, no network.** That
+covers the headline floor, the two-geometry table, the whole contiguity-gate sweep, and the
+10,410 judge-side cells at the vendor's released 530-pattern ruleset and the no-window
+reader. The
+benign (false-positive) arm ships as aggregate counts instead of per-item rows, by the
+explicit decision in [What is withheld](#what-is-withheld), so its published rates stay
+reachable but are not re-derivable per item. Five scripts need the two corpora fetched
+first, and regenerating any judge verdict needs API keys and money.
+**[Exactly which, script by script.](#what-recomputes-and-what-does-not)**
 
 </div>
 
@@ -69,6 +78,8 @@ python -I scripts/v3_jointmiss_audit_score.py     # the human audit and the corr
 python -I scripts/v2_phase5_audit_score.py        # the 450-item label audit
 python -I scripts/v2_label_robustness.py          # the multiply-caught restrictions
 python -I scripts/v3_orgeom_verify.py             # the two-geometry independence table
+python -I scripts/v3_gate_analyze.py              # the contiguity gate and its theta_b sweep
+python -I scripts/v3_malarm_analyze.py            # the two new readers, malicious arm
 ```
 
 Run the first one if you only run one. It refuses to report anything unless the paper's
@@ -94,6 +105,75 @@ python -I scripts/acquire_data.py     # MaliciousSkillBench, and a bounded Skill
 
 ---
 
+## What recomputes, and what does not
+
+Established by building this tree and running each script in it, so you can tell before
+downloading. These are the scripts that derive a published number; the rest of
+`scripts/` is the measurement code that produced the tables.
+
+**Recomputes from the shipped tables. `pandas` only, no key, no network.**
+
+| | |
+|---|---|
+| `v3_jointmiss_audit_score.py` | the joint-miss floor and the human audit. Refuses to report unless the paper's eight baseline figures reproduce first |
+| `v3_orgeom_verify.py` | the two-geometry independence table. Refuses to report unless the published cells reproduce exactly |
+| `v3_gate_analyze.py` | the contiguity gate, $\theta_b$ and the full threshold sweep |
+| `v2_label_robustness.py` | the defense ordering under the multiply-caught restrictions |
+| `v2_phase5_audit_score.py` | the 450-item label audit, except Cohen's kappa — see the gaps below |
+| `v2_final_recompute.py` | the cross-judge table, and the superseded-width record of sections 3, 3b and 5 |
+| `v3_malarm_analyze.py` | the released 530-pattern ruleset and the no-window reader, judge side, malicious arm: 10,410 cells over nine judges |
+| `v2_orgeom_indep.py` | the superseded-width record only, not the published table — see the gaps below |
+| `make_figures.py` | the three figures. Create `reports/` first; it does not |
+
+**Needs the two corpora, which are fetched rather than redistributed.** Run
+`scripts/acquire_data.py` (adds `huggingface_hub` and `pyarrow`, and network). No API key
+and no cost. Without it these stop on a missing `.parquet`: `v2_layering.py`,
+`v2_skillgate.py`, `v2_phase3_cross.py`, `v3_span_read_frac.py`,
+`v3_jointmiss_audit_pack.py`.
+
+**Needs API keys and money to regenerate.** Every judging run — `v3_gate_score.py`,
+`v3_newreaders.py`, `v2_haiku_full.py`, `validate_pipeline.py` and the `pilot_*` family.
+Their outputs are what this artifact ships, so nothing above has to call a model. Separately,
+`v3_real_ruleset.py` needs a local checkout of the third-party SkillGate repository, which
+is not ours to redistribute; it prints its usage and exits.
+
+**Blocked by the benign-arm withholding.** Two scripts stop where they reach the withheld
+per-item rows:
+
+- `v3_benarm_analyze.py`, the benign arm of the 530-pattern and no-window readers, stops on
+  its own assertion, `0 benign cells, expected 2983`.
+- `v2_number_audit.py` passes its layering block (10 checks) and then stops in the benign
+  `tab:cost` block on a zero denominator; its section 4, the regex reader's two benign
+  draws, is unreachable for the same reason.
+
+The rates themselves survive in `_benign_aggregate/`, which is grouped counts rather than
+rows, and summing it reproduces the published figures exactly:
+
+- the regex reader's false positives, $0.1187$ over $n = 2983$ at the original window width
+  and $0.1012$ over the same 2983 at the corrected one;
+- all twenty values of the released-ruleset benign table — five judges $\times$ two readers
+  $\times$ strict and blocked — over the 29,830 cells, counting `ERR` as no verdict.
+  `python -I scripts/v3_benign_aggregate_check.py <this directory>` checks exactly that and
+  exits non-zero if any of the twenty moves.
+
+Alongside the verdict counts, `_benign_aggregate/*.prefilter.csv` carries the arm's
+**prefilter** statistics as sums per judge, reader and attack: the artifact count, how many
+fired, and totals of selected prompt length, hit count and payload coverage. Those are what
+make the published benign firing rates ($0.644$, $0.530$, $1.000$) and mean selected lengths
+recomputable here; a total over 2983 artifacts identifies no artifact, which is why it ships
+where the rows do not. `v3_artifact_integrity.py` reads it when the rows are absent and says
+so in a note.
+
+What the counts cannot give back is anything that depends on row identity or row order: the
+split of those 2983 into the two 1{,}500-skill draws the paper quotes separately at $0.108$
+and $0.129$, any per-skill pairing, and any statistic over individual benign items.
+
+**Blocked for an unrelated reason.** `v2_dispute_by_judge_model.py` reads
+`final/results/llm_audit_trail.csv`, which is not in this tree — see
+[What is withheld](#what-is-withheld).
+
+---
+
 ## Where each claim comes from
 
 | Paper claim | Script | Data |
@@ -108,6 +188,8 @@ python -I scripts/acquire_data.py     # MaliciousSkillBench, and a bounded Skill
 | Prompt Overflow's contiguity gate, swept over its calibration threshold | `scripts/v3_gate_score.py`, `scripts/v3_gate_analyze.py` | `followup_results/`, per-window scores |
 | Span-level reader coverage: whether a whole malicious instruction lands in a window | `scripts/v3_span_read_frac.py` | `research_notes/v2_main/v3_span_read_frac_*.csv` |
 | Cross-judge replication | `scripts/v2_phase3_cross.py`, `scripts/v2_final_recompute.py` | `research_notes/v2_main/v2_phase3_items_*.csv` |
+| The released 530-pattern ruleset and the no-window reader, judge side, malicious arm: 10,410 cells over nine judges | `scripts/v3_malarm_analyze.py` | `followup_results/v3_newreaders_cells*.csv` |
+| The same two readers' benign arm, 29,830 cells — **rates only**, from the aggregate, because the script needs the withheld per-item rows | (none; see below) | `followup_results/_benign_aggregate/v3_newreaders_cells_pubben*.csv` |
 | Figures | `scripts/make_figures.py` | `research_notes/v2_main/verified_numbers.md` |
 
 ---
@@ -116,7 +198,7 @@ python -I scripts/acquire_data.py     # MaliciousSkillBench, and a bounded Skill
 
 ```
 .
-|-- scripts/                     57 scripts; the analysis scripts read only the CSVs here
+|-- scripts/                     measurement + analysis; the analysis scripts read only the CSVs here
 |-- research_notes/
 |   |-- v2_main/                 per-item tables for the main measurement
 |   |   `-- _benign_aggregate/   the benign arm, as counts -- see "What is withheld"
@@ -164,9 +246,16 @@ the build refused to emit; re-running it needs a term list of your own.</td>
 </tr>
 </table>
 
-Nothing else is held back. The malicious items ship with their text, the audit sheets with
-their verdicts and evidence quotes, and the human audit with its filled sheet, its blank
-template and its unblinding key.
+One more file is absent without having been a disclosure decision: the per-call audit trail
+`final/results/llm_audit_trail.csv`, which is what `scripts/v2_dispute_by_judge_model.py`
+reads to split the caught-set dispute rate by judge model version ($0.020$, 3 of 151, under
+the predecessor against $0.083$, 11 of 132, under the current model). That script therefore
+cannot run here. The split it computes is reported in the paper and nowhere else in this
+tree; no other number depends on it.
+
+Otherwise nothing is held back. The malicious items ship with their text, the audit sheets
+with their verdicts and evidence quotes, and the human audit with its filled sheet, its
+blank template and its unblinding key.
 
 ---
 
@@ -199,19 +288,32 @@ than leaving a tree that leaks. Please do not try to attribute it.
   `scripts/v3_orgeom_verify.py`**: it refuses to print anything until it has reproduced the
   published cells exactly (`165/14/19/26`, `120/19/9/20`, `120/8/10/30`, `92/24/5/23`,
   `58/5/2/9`), and then runs the same table with the label-suspect skills deleted. The two
-  older scripts are left in place because they produced numbers in the v2 record, not
-  because they should be run now.
-- **Two figures cannot be recomputed here, both because of the benign-arm withholding, and
-  neither is an error in the paper.** First, the reliability subsample behind Cohen's kappa
-  is 100 items stratified across the four strata, 25 of them stratum B; with B withheld,
+  older scripts are left in place, and left at that reader, because they are the only
+  reproduction of the pre-correction column the paper quotes: on `qwen3:8b` the two
+  geometries tie there at exactly $0.242$ against $0.242$, which is the paper's "at the
+  mistaken half width the two had tied exactly", and the cross-judge split is 70 and 50
+  where the corrected width gives 70 and 45. Repointing them at `regex_real` would erase
+  that and duplicate `v3_orgeom_verify.py`. Both now say so in their own text and label
+  their printed output, so the numbers cannot be mistaken for the published table.
+- **One figure cannot be recomputed here, because of the benign-arm withholding, and it is
+  not an error in the paper.** The reliability subsample behind Cohen's kappa is 100 items
+  stratified across the four strata, 25 of them stratum B; with B withheld,
   `scripts/v2_phase5_audit_score.py` computes kappa over the 75 that remain and prints
   $0.903$ and $0.899$ where the paper reports $0.942$ and $0.940$ over all 100. The stratum-A
-  disputed share, 14 of 283 at $0.049$ $[0.030, 0.081]$, does reproduce exactly. Second,
-  `scripts/v3_gate_analyze.py` keeps only cells whose every window is present and decides
-  that by joining against the published verdicts in `v2_phase1_items.csv`, whose benign rows
-  are withheld, so every benign cell drops and it cannot calibrate $\theta_b$. The benign
-  window scores themselves do ship, under surrogate ids in `v3_gate_windows.jsonl`, so the
-  quantity is directly computable: the 99th percentile of those 11,651 scores is $0.9975$.
+  disputed share, 14 of 283 at $0.049$ $[0.030, 0.081]$, does reproduce exactly.
+- **The contiguity gate used to be a second such figure, and is no longer.**
+  `scripts/v3_gate_analyze.py` keeps only cells whose every window is present. It took the
+  expected window count by joining against the published verdicts in `v2_phase1_items.csv`,
+  whose benign rows are withheld and whose benign ids the window cache replaces with
+  surrogates, so every benign cell dropped, $\theta_b$ — a percentile over the benign arm —
+  came back undefined, and the script died on it mid-report. It now takes the count from
+  `v3_gate_windows.jsonl` itself, which records `n_windows` on every window. The two counts
+  agree on all 3182 cells, so no number moved: the published verdicts are still joined where
+  they ship, and the script reports how many cells it could join. $\theta_b$ is again the
+  99th percentile of the 11,651 benign window scores, $0.9975$, and the published threshold
+  sweep recomputes offline: on the 919 fragmentation cells and the 1768 benign cells,
+  fragmentation attack success $0.365 / 0.470 / 0.592 / 1.000$ against the disjunction's
+  $0.373$, at benign false-positive rates $0.097 / 0.084 / 0.053 / 0.000$.
 - **The per-window gate scores ship with the benign arm's skill identities replaced.** Each
   record keeps its score, window index, length and label; a benign record's `skill_hash` is a
   surrogate assigned in order of first appearance, because the real one together with the

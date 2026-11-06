@@ -1,0 +1,2 @@
+model,reader,attack,n,n_fired
+gpt-4o-mini,extract_then_judge,clean,200,200

@@ -1,0 +1,9 @@
+judge,reader,attack,n,n_fired,sum_prompt_len,n_hits_rows,sum_n_hits,n_covered,sum_covered
+claude-haiku-5-5,skillgate530,clean,1,1,3988,1,9,0,0.0
+claude-opus-5-5,fullfile,clean,30,30,144295,0,0,0,0.0
+claude-opus-5-5,skillgate530,clean,30,15,43481,30,57,0,0.0
+claude-sonnet-5-5,fullfile,clean,2,2,20115,0,0,0,0.0
+gpt-4o-mini,fullfile,clean,4,4,35669,0,0,0,0.0
+gpt-4o-mini,skillgate530,clean,1,1,3988,1,9,0,0.0
+openai/gpt-5.1,fullfile,clean,3,3,35546,0,0,0,0.0
+openai/gpt-5.1,skillgate530,clean,2,2,5513,2,6,0,0.0

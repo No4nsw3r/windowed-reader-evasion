@@ -9,10 +9,15 @@
    built ourselves; this one is somebody else's, and it is the configuration a reviewer will
    ask about.
 
-   Caveat recorded in the output: their 530-pattern ruleset is not published, so the
-   prefilter here is this project's own 49-group risk regex. A weaker prefilter fires less
-   often, which makes this an optimistic stand-in for coverage and a pessimistic one for
-   their false-positive rate.
+   Caveat recorded in the output: the prefilter here is this project's own 49-group risk
+   regex and not SkillGate's 530-pattern ruleset, which was taken to be unpublished when
+   these runs were made and is in fact released under MIT at
+   github.com/awsm-research/skillgate. scripts/v3_real_ruleset.py measures what the
+   substitution costs, with no judge calls: the released ruleset is the NARROWER prefilter
+   on this corpus, firing on 0.612 of the 165 malicious artifacts against our 0.909 and
+   covering 0.378 of the payload against our 0.692. So this is an optimistic stand-in for
+   coverage -- as the earlier note said -- but not for the reason the earlier note gave,
+   and the "a weaker prefilter fires less often" reasoning was backwards.
 
 2. `trunc10k` / `trunc12k` -- a single truncated read at the two window sizes that appear
    in the literature (a 10,000-character reviewer, and the 12k full-file comparator the
@@ -254,6 +259,17 @@ def main():
         for B in bn:
             h = D.skill_hash(B)
             for rd in rds:
+                # KNOWN DEFECT, left in place because the published cells were written
+                # with it: this resume key carries no arm, so a benign skill whose hash
+                # also appears in the malicious caught set is skipped once the malicious
+                # `clean` cell for the same reader has run. Exactly one skill is affected,
+                # 84db57956e5f744702553e931495048c (item S0367, a MalSkillBench malicious
+                # artifact that is also in the benign parquet), which is why the published
+                # benign arm is 2983 and a fresh draw is 2984. Dropping it is correct for a
+                # false-positive denominator, so the published rates stand; v3_newreaders
+                # .benign_union() now excludes it by name instead of by collision. Adding
+                # the arm to this key would re-run every benign cell, so do not change it
+                # without re-running the arm.
                 if (MODEL, h, "clean", rd) not in done:
                     jobs.append(("ben", h, B, "clean", 0, rd))
     else:
@@ -319,8 +335,10 @@ def summarise():
     ok = d[d.verdict.isin(GOOD)]
     L = ["# A deployed regex-anchored reader, and the baseline window size\n",
          f"Prefilter: this project's own risk regex ({A.RISK.pattern.count('|') + 1} "
-         "alternation groups), standing in for the deployed system's unpublished "
-         f"530-pattern ruleset. Window {CW} characters per hit, hits within {DEDUP} "
+         "alternation groups), standing in for the deployed system's "
+         "530-pattern ruleset, which is released and which these runs did not use; see "
+         "scripts/v3_real_ruleset.py for what the substitution costs. "
+         f"Window {CW} characters per hit, hits within {DEDUP} "
          f"characters de-duplicated, first {MS} windows joined behind a "
          f"{len(PREAMBLE)}-character preamble, prompt capped at {CAP}. When the prefilter "
          "does not fire, no call is made and the verdict is clean -- that gate is the "

@@ -1,0 +1,2 @@
+model,attack,n,n_fired,n_covered,sum_covered
+gpt-4o-mini,clean,1500,1458,0,0.0
