@@ -209,6 +209,22 @@ def copy_gate_windows(src, dst):
                 if h not in sur:
                     sur[h] = "ben%05d" % (len(sur) + 1)
                 r["skill_hash"] = sur[h]
+                # The `key` field is `arm|hash|attack|defense|window_index` and carried the
+                # real hash straight through, which defeated the surrogate above entirely:
+                # 11,651 benign records, 300 third-party skills recoverable, 56 of them
+                # with a MALICIOUS window verdict. The hash is an unsalted md5 of the skill
+                # text whose function this artifact ships, and the benign corpus is public,
+                # so a reader could invert it. Substitute the surrogate here too, and
+                # assert that no 32-hex field survives anywhere in the record.
+                r["key"] = "|".join(sur[h] if p == h else p
+                                    for p in str(r.get("key", "")).split("|"))
+                for k, v in r.items():
+                    s = str(v)
+                    assert not (len(s) == 32 and all(c in "0123456789abcdef" for c in s)), (
+                        f"benign gate-window record still carries a raw hash in {k!r}; "
+                        "the withholding is not in effect")
+                    assert h not in s, (
+                        f"benign gate-window record still contains the real hash in {k!r}")
                 n_ben += 1
             else:
                 n_mal += 1

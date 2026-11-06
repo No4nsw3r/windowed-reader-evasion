@@ -319,10 +319,17 @@ than leaving a tree that leaks. Please do not try to attribute it.
   fragmentation attack success $0.365 / 0.470 / 0.592 / 1.000$ against the disjunction's
   $0.373$, at benign false-positive rates $0.097 / 0.084 / 0.053 / 0.000$.
 - **The per-window gate scores ship with the benign arm's skill identities replaced.** Each
-  record keeps its score, window index, length and label; a benign record's `skill_hash` is a
-  surrogate assigned in order of first appearance, because the real one together with the
-  per-window label is the benign arm's per-skill verdict. Malicious records are verbatim.
-  `scripts/build_artifact.py` does this in `copy_gate_windows`.
+  record keeps its score, window index, length and label; a benign record's `skill_hash`
+  *and* the hash component of its composite `key` are both replaced by one surrogate,
+  assigned in order of first appearance, because the real hash together with the per-window
+  label is the benign arm's per-skill verdict. Malicious records are verbatim.
+  `scripts/build_artifact.py` does this in `copy_gate_windows`, and then asserts per record
+  that no 32-hex token and no occurrence of the real hash survives in any field. That
+  assertion exists because an earlier release of this artifact replaced `skill_hash` and
+  left the hash inside `key`, which defeated the substitution for all 11,651 benign records
+  and made 300 third-party skills recoverable, 56 of them carrying a `MALICIOUS` window
+  verdict. The build's identity scan could not catch it: that scan looks for the authors'
+  own identifying tokens, and a third party's content hash is not one.
 - **The pilot tables in `research_notes/pilot/` are superseded.** They ship because the paper
   reports a correction to its own earlier measurement, and that correction is only checkable
   against them.
