@@ -122,6 +122,10 @@ downloading. These are the scripts that derive a published number; the rest of
 | `v2_phase5_audit_score.py` | the 450-item label audit, except Cohen's kappa — see the gaps below |
 | `v2_final_recompute.py` | the cross-judge table, and the superseded-width record of sections 3, 3b and 5 |
 | `v3_malarm_analyze.py` | the released 530-pattern ruleset and the no-window reader, judge side, malicious arm: 10,410 cells over nine judges |
+| `v3_artifact_integrity.py` | the prefilter columns of every published cell, on one stated convention each. Run this first if you intend to trust anything derived |
+| `v3_power_asymmetry.py` | the structural effect with exact intervals, its minimum detectable effect, and the power asymmetry between the two geometries |
+| `v3_missets.py` | the two readers' miss sets at `gap_il_4x2600`, the 45 the regex reader catches and the partition passes |
+| `v3_caughtset_correction.py` | the caught set's two error-rate estimates, the correction run at each, and the 18.3x insulation ratio. Its benign block reads the aggregate counts here, and says so |
 | `v2_orgeom_indep.py` | the superseded-width record only, not the published table — see the gaps below |
 | `make_figures.py` | the three figures. Create `reports/` first; it does not |
 

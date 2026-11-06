@@ -218,11 +218,26 @@ def part1():
     print(f"  caught by both                                        {both}"
           f"    (paper 152)")
     print(f"  caught by the LLM judge (the ASR selection event)     {len(llm_caught)}")
-    print(f"  benign arm with all three usable                      n = {len(ben)}"
-          f"   (paper 400)")
-    if len(mal) != 1124 or len(jm) != 631 or both != 152 or len(ben) != 400:
+    # The benign arm's rows are withheld in a built artifact, so count it from the
+    # aggregate when they are absent. The aggregate groups on `llm`, `cisco` and
+    # `skillfrisk`, so the all-three-usable restriction is still expressible, and nothing
+    # per-skill is read. Without this the gate failed in the artifact on 0 against 400 and
+    # declared every number above it unverified.
+    nben = len(ben)
+    nben_src = "rows"
+    if not nben:
+        agg = os.path.join(NOTES, "_benign_aggregate", "v2_layering_items.csv")
+        if os.path.isfile(agg):
+            nben = sum(int(r.get("n") or 0) for r in read(agg)
+                       if r.get("arm") == "ben"
+                       and "" not in (r.get("llm", ""), r.get("cisco", ""),
+                                      r.get("skillfrisk", "")))
+            nben_src = "aggregate counts"
+    print(f"  benign arm with all three usable                      n = {nben}"
+          f"   (paper 400, from {nben_src})")
+    if len(mal) != 1124 or len(jm) != 631 or both != 152 or nben != 400:
         FAILS.append("the layering baseline does not reproduce "
-                     f"({len(mal)}/{len(jm)}/{both}/{len(ben)} against 1124/631/152/400)")
+                     f"({len(mal)}/{len(jm)}/{both}/{nben} against 1124/631/152/400)")
 
     jkey, jsheet = jointmiss()
     J = [i for i, r in jkey.items() if r["stratum"] == "J"]
@@ -360,6 +375,32 @@ def part2(st):
     fp_cis = sum(1 for r in ben if r["cisco"] == "MALICIOUS")
     both_silent = sum(1 for r in ben
                       if r["llm"] != "MALICIOUS" and r["cisco"] != "MALICIOUS")
+    src = "per-item rows"
+    if not nben:
+        # In a built artifact the benign arm's rows are withheld, which used to make this
+        # block die on a zero denominator. The counts it needs survive in the aggregate,
+        # which groups on the verdict columns `llm` and `cisco` and therefore keeps the
+        # joint cell this ratio is built from. Nothing per-skill is read either way.
+        agg = os.path.join(NOTES, "_benign_aggregate", "v2_layering_items.csv")
+        if os.path.isfile(agg):
+            for r in read(agg):
+                if r.get("arm") != "ben":
+                    continue
+                n = int(r.get("n") or 0)
+                if "" in (r.get("llm", ""), r.get("cisco", ""), r.get("skillfrisk", "")):
+                    continue                      # match the all-three-usable restriction
+                nben += n
+                fp_llm += n if r["llm"] == "MALICIOUS" else 0
+                fp_cis += n if r["cisco"] == "MALICIOUS" else 0
+                both_silent += n if (r["llm"] != "MALICIOUS"
+                                     and r["cisco"] != "MALICIOUS") else 0
+            src = "the withheld arm's aggregate counts"
+    if not nben:
+        print("  SKIPPED: the benign arm is absent in both per-item and aggregate form,")
+        print("  so the false-positive rates this ratio is built from cannot be recomputed")
+        print("  here. The ratio the paper quotes is 18.3.")
+        return
+    print(f"  (benign counts from {src})")
     print(f"  on the {nben} benign skills:  LLM flags {ci(fp_llm, nben)}  "
           f"(paper 0.050)")
     print(f"  {'':23s}        Cisco flags {ci(fp_cis, nben)}  (paper 0.043)")
