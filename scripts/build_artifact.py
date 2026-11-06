@@ -162,8 +162,14 @@ def split_arm(src, dst_dir, name):
         for key, grp in b.groupby(gcols, dropna=False):
             row = dict(zip(gcols, key if isinstance(key, tuple) else (key,)))
             row["n"] = len(grp)
+            # `n_fired` must be emitted even when the table has no `n_calls` column, or a
+            # consumer reading the aggregate sees a firing rate of zero beside a non-zero
+            # mean selected length -- which is what `exp2_geometry` produced. Fall back to
+            # "the prefilter selected something".
             if "n_calls" in grp.columns:
                 row["n_fired"] = int((grp["n_calls"].fillna(0) > 0).sum())
+            elif "prompt_len" in grp.columns:
+                row["n_fired"] = int((grp["prompt_len"].fillna(0) > 0).sum())
             if "prompt_len" in grp.columns:
                 row["sum_prompt_len"] = int(grp["prompt_len"].fillna(0).sum())
             if "n_hits" in grp.columns:
