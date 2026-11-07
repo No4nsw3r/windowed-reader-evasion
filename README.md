@@ -126,20 +126,31 @@ downloading. These are the scripts that derive a published number; the rest of
 | `v3_power_asymmetry.py` | the structural effect with exact intervals, its minimum detectable effect, and the power asymmetry between the two geometries |
 | `v3_missets.py` | the two readers' miss sets at `gap_il_4x2600`, the 45 the regex reader catches and the partition passes |
 | `v3_caughtset_correction.py` | the caught set's two error-rate estimates, the correction run at each, and the 18.3x insulation ratio. Its benign block reads the aggregate counts here, and says so |
+| `v3_frontier_analyze.py` | the frontier full-read grid: 4,620 cells, four frontier judges, seven attacks, with exact intervals, BOTH refusal conventions and the two-route bridge. Offline; refuses to print unless every published cell reproduces |
+| `v3_granularity.py` | the fragment-granularity sweep at fixed filler volume: 3,300 cells, five granularities, four readers, with the exact intervals, the sign flip and the pinned-geometry check |
+| `v3_window_density.py` | the per-window payload density at both geometries, on all three of the statistics that have been compared, so the comparison that inverts cannot be repeated by accident |
+| `v3_reader_disagreement.py` | the direction behind the 0.827 agreement figure: which of the two readers catches what the other passes. Refuses to print unless the published cell reproduces |
 | `v2_orgeom_indep.py` | the superseded-width record only, not the published table — see the gaps below |
 | `make_figures.py` | the three figures. Create `reports/` first; it does not |
 
 **Needs the two corpora, which are fetched rather than redistributed.** Run
 `scripts/acquire_data.py` (adds `huggingface_hub` and `pyarrow`, and network). No API key
-and no cost. Without it these stop on a missing `.parquet`: `v2_layering.py`,
+and no cost. Without it these seven stop on a missing `.parquet`, which was checked by
+running each one in a built tree with no corpus present: `v2_layering.py`,
 `v2_skillgate.py`, `v2_phase3_cross.py`, `v3_span_read_frac.py`,
-`v3_jointmiss_audit_pack.py`.
+`v3_jointmiss_audit_pack.py`, `v3_real_ruleset.py` and `v3_window_density.py`. The last two
+reach the corpus through `v2_skillgate.py` and `v3_span_read_frac.py` rather than reading it
+themselves, which is why they were missing from this list until the run that produced it.
 
 **Needs API keys and money to regenerate.** Every judging run — `v3_gate_score.py`,
-`v3_newreaders.py`, `v2_haiku_full.py`, `validate_pipeline.py` and the `pilot_*` family.
-Their outputs are what this artifact ships, so nothing above has to call a model. Separately,
-`v3_real_ruleset.py` needs a local checkout of the third-party SkillGate repository, which
-is not ours to redistribute; it prints its usage and exits.
+`v3_newreaders.py`, `v3_frontier_fullfile.py`, `v2_haiku_full.py`, `validate_pipeline.py`
+and the `pilot_*` family. Their outputs are what this artifact ships, so nothing above has
+to call a model. `v3_frontier_fullfile.py` is the one that ran the frontier grid, at \$8.24
+over 4,620 cells; `v3_frontier_analyze.py` derives every figure the appendix prints from the
+two shards it left behind, so the grid is checkable without rerunning it. Those shards keep
+1,666 `ERR` rows that the driver superseded on resume — it re-runs anything without a
+decided verdict — and the analysis script drops them and then asserts 165 decided cells in
+every one of the 28 judge-attack pairs, which is what proves the re-runs all landed.
 
 **Blocked by the benign-arm withholding.** Two scripts stop where they reach the withheld
 per-item rows:
@@ -194,6 +205,10 @@ and $0.129$, any per-skill pairing, and any statistic over individual benign ite
 | Cross-judge replication | `scripts/v2_phase3_cross.py`, `scripts/v2_final_recompute.py` | `research_notes/v2_main/v2_phase3_items_*.csv` |
 | The released 530-pattern ruleset and the no-window reader, judge side, malicious arm: 10,410 cells over nine judges | `scripts/v3_malarm_analyze.py` | `followup_results/v3_newreaders_cells*.csv` |
 | The same two readers' benign arm, 29,830 cells — **rates only**, from the aggregate, because the script needs the withheld per-item rows | (none; see below) | `followup_results/_benign_aggregate/v3_newreaders_cells_pubben*.csv` |
+| The frontier judges reading the whole file, on all seven attacks: no attack exceeds the unattacked baseline, and the ranking of the four rows reverses between the two refusal conventions | `scripts/v3_frontier_analyze.py` | `followup_results/v3_frontier_fullfile*.csv`, and `v3_newreaders_cells*.csv` for the route bridge |
+| Fragment granularity at fixed filler volume, and the 15 points of attack success that move with the reader geometry pinned | `scripts/v3_granularity.py` | `followup_results/exp4_il_granularity.csv` |
+| Per-window payload density at both geometries, and the three statistics that have been confused for one another | `scripts/v3_window_density.py` | the corpus and the harness seed; no judged cells needed |
+| Which reader catches what the other passes, behind the 0.827 agreement figure | `scripts/v3_reader_disagreement.py` | `research_notes/v2_main/v2_phase*_items.csv`, `v2_skillgate_items.csv` |
 | Figures | `scripts/make_figures.py` | `research_notes/v2_main/verified_numbers.md` |
 
 ---
@@ -260,6 +275,25 @@ tree; no other number depends on it.
 Otherwise nothing is held back. The malicious items ship with their text, the audit sheets
 with their verdicts and evidence quotes, and the human audit with its filled sheet, its
 blank template and its unblinding key.
+
+---
+
+## Why this is releasable
+
+The artifact ships working attack transforms and the malicious artifact text they are built
+from. We judge that publishing the measurement helps defenders more than attackers, because
+the vulnerable parameter is a window cap, and a window cap is invisible to a deployer who
+has not tested for it: an operator cannot find this in their own stack without the
+construction, while an attacker can rediscover it by reading one scanner's source. The
+truncation case has already been demonstrated publicly against a deployed scanner by
+others, and the payloads here are items from a public benchmark, not new malware -- nothing
+in `audit/items` or `audit_jointmiss/items` was written by us.
+
+What the release deliberately does not contain is a working end-to-end exploit against any
+named production service. The readers are reconstructions measured on a public corpus. The
+skill text is inert data: nothing in this tree executes it, the third-party pattern files
+are parsed with `ast` and never imported, and every analysis script is safe to run with
+`python -I` on a machine that has never seen the corpus.
 
 ---
 
@@ -347,6 +381,7 @@ than leaving a tree that leaks. Please do not try to attribute it.
 | `scripts/` | MIT, see [`LICENSE`](LICENSE) |
 | the result tables under `research_notes/` and `followup_results/`, and the audit sheets and keys | CC-BY-4.0 |
 | the corpus items under `audit/items` and `audit_jointmiss/items` | CC-BY-4.0, from MaliciousSkillBench and SkillMD-138K, redistributed under those terms with attribution |
+| `data/skillgate_patterns/*.py` | MIT, from `github.com/awsm-research/skillgate` at commit `c1641c5d5664634296977ff7491f4cff469acfb7`, redistributed under those terms with the notice in `data/skillgate_patterns/LICENSE`. `PROVENANCE.txt` beside them carries the sha256 of each file, and `build_artifact.py` re-derives both and refuses to build if either has changed. They are parsed with `ast`, never imported. |
 
 The copyright line in `LICENSE` reads `The Authors` for the duration of anonymous review and
 is replaced with the named authors in the archival release.

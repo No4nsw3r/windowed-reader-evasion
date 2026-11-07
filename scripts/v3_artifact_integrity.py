@@ -510,12 +510,13 @@ def main():
         pf = [p for _, _, _, p in CHAR_DRIFT]
         print(f"\n  residual spans {min(pf):+.2f} to {max(pf):+.2f} characters per firing "
               f"artifact. Its cause is")
-        print("  that the shipped `prompt_len` column records about two characters more")
-        print("  than `v3_real_ruleset.py`'s regeneration of the same prompt, so a cell")
-        print("  quoted from the shipped column lands within rounding while one quoted")
-        print("  from the regeneration carries the whole offset. Every published cell is")
-        print("  now quoted from the shipped column, which is why the residual is small;")
-        print("  it is printed rather than absorbed into a tolerance so that a reader")
+        print("  rounding in the printed table: every published cell is quoted from the")
+        print("  shipped `prompt_len` column to the nearest character. There used to be a")
+        print("  second, larger cause -- `v3_real_ruleset.py` regenerated the same prompt")
+        print("  two characters short, because the reader builds PREAMBLE + the two-byte")
+        print("  separator + body and the gate counted only the preamble -- and that is")
+        print("  fixed, so the regeneration and the shipped column now agree. The residual")
+        print("  is printed rather than absorbed into a tolerance so that a reader")
         print("  recomputing from this artifact sees what we saw.")
 
     print("\n" + "=" * 96)

@@ -1,0 +1,15 @@
+Third-party pattern files, MIT, from github.com/awsm-research/skillgate
+Pinned commit: c1641c5d5664634296977ff7491f4cff469acfb7  (repository HEAD on 2026-11-06)
+Path in repo:  skillgate/classifier/
+These two files last changed in 82f7f0cc6fc67521b13a6bd72668ecc6dfb75c26 (2026-07-15),
+so the pinned HEAD and that commit serve byte-identical files.
+
+sha256, verified byte-for-byte against the pinned commit on 2026-11-07:
+  430d304232a674dbe0713a4a2049a54bfa95db684d162817493d01e9c9654c1e   107091 bytes  attack_patterns.py
+  169b812f29853bda5ea9440f93a8180fa8cb5383bd69ab7fdb3eb12dd9f748dd    18896 bytes  sigma_patterns.py
+
+Redistributed here under the MIT licence; its text is in LICENSE beside these files.
+The MIT licence permits redistribution with the notice, and an earlier release of this
+artifact withheld these files on the mistaken ground that it did not.
+
+These are PARSED with ast, never imported or executed. See scripts/v3_real_ruleset.py.

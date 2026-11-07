@@ -31,7 +31,11 @@ Fetching the ruleset (it is MIT and public; these two files are all that is need
     B=https://raw.githubusercontent.com/awsm-research/skillgate/main/skillgate/classifier
     curl -sSO $B/attack_patterns.py && curl -sSO $B/sigma_patterns.py
 
-usage: python -I scripts/v3_real_ruleset.py <that directory>
+The two files also ship in this tree at `data/skillgate_patterns/`, pinned to commit
+c1641c5d5664634296977ff7491f4cff469acfb7 with their sha256 and the MIT notice beside
+them, so the fetch above is only needed to check another commit.
+
+usage: python -I scripts/v3_real_ruleset.py [directory, default data/skillgate_patterns]
 """
 import ast
 import os
@@ -40,11 +44,13 @@ import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-DL = sys.argv[1] if len(sys.argv) > 1 else None
-if not DL or not os.path.isdir(DL):
-    sys.exit("pass the directory holding attack_patterns.py and sigma_patterns.py")
-
 ROOT = r"."
+DL = (sys.argv[1] if len(sys.argv) > 1
+      else os.path.join(ROOT, "data", "skillgate_patterns"))
+if not os.path.isdir(DL):
+    sys.exit("pass the directory holding attack_patterns.py and sigma_patterns.py; "
+             "the shipped copy is data/skillgate_patterns")
+
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
 
@@ -93,7 +99,12 @@ import v2_skillgate as SG         # noqa: E402
 
 A.load_pool()
 assert len(A._POOL) >= 100, "filler pool too small"
-PRE = len(SG.PREAMBLE)
+# The reader builds `PREAMBLE + "\n\n" + body`, so the fixed overhead on every prompt is
+# the preamble PLUS that two-character separator. Using len(PREAMBLE) alone made this gate
+# report 2764 and 3452 against the published 2766 and 3454 -- a constant two-character
+# shortfall that the old +/-15 tolerance hid. The published figures are the authority here:
+# followup_results/exp2_geometry.csv gives 2766.05 and 3454.23 over n = 165.
+PRE = len(SG.PREAMBLE) + 2
 
 
 def ours(text, cw=1000, dedup=250, ms=20, cap=8000):
@@ -232,8 +243,10 @@ if abs(g["clean"]["cov"] - EXPECT["cov_c"]) > 0.004:
     bad.append(f"cov clean {g['clean']['cov']:.4f} != {EXPECT['cov_c']}")
 if abs(g["il_matched"]["cov"] - EXPECT["cov_i"]) > 0.004:
     bad.append(f"cov il {g['il_matched']['cov']:.4f} != {EXPECT['cov_i']}")
-if abs(g["clean"]["plen"] - EXPECT["plen_c"]) > 15:
+if abs(g["clean"]["plen"] - EXPECT["plen_c"]) > 2:
     bad.append(f"plen clean {g['clean']['plen']:.0f} != {EXPECT['plen_c']}")
+if abs(g["il_matched"]["plen"] - EXPECT["plen_i"]) > 2:
+    bad.append(f"plen il {g['il_matched']['plen']:.0f} != {EXPECT['plen_i']}")
 
 print()
 if bad:

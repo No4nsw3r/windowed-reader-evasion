@@ -338,6 +338,33 @@ def main():
         copy_text(os.path.join(src, rel), os.path.join(OUT, "audit_jointmiss", dst))
     print("  human audit: %d items, the filled sheet and the key" % nj)
 
+    # ---- the third-party ruleset: shipped, with its licence and a pinned commit
+    # Appendix F's measurement of the released 530-pattern ruleset is the paper's most
+    # important concession, and an earlier release of this artifact withheld the two
+    # pattern files on the mistaken ground that they were "not ours to redistribute".
+    # They are MIT. They ship here VERBATIM -- shutil.copyfile, never copy_text, because
+    # the de-identifying substitution would silently rewrite a third party's regexes and
+    # invalidate the checksums shipped beside them -- and the build re-derives each
+    # sha256 and refuses to continue if it is not the pinned file.
+    pdir = os.path.join(ROOT, "data", "skillgate_patterns")
+    want = {}
+    for ln in io.open(os.path.join(pdir, "PROVENANCE.txt"), encoding="utf-8"):
+        m = re.match(r"\s*([0-9a-f]{64})\s+\d+\s+bytes\s+(\S+)", ln)
+        if m:
+            want[m.group(2)] = m.group(1)
+    assert len(want) == 2, "PROVENANCE.txt lost its checksum lines"
+    pdst = _mk(OUT, "data", "skillgate_patterns")
+    for fn in sorted(os.listdir(pdir)):
+        shutil.copyfile(os.path.join(pdir, fn), os.path.join(pdst, fn))
+        if fn in want:
+            with open(os.path.join(pdst, fn), "rb") as fh:
+                h = hashlib.sha256(fh.read()).hexdigest()
+            assert h == want[fn], (
+                "%s is not the pinned third-party file (%s..., expected %s...)"
+                % (fn, h[:16], want[fn][:16]))
+    print("  ruleset: %d MIT pattern files shipped, checksums verified, "
+          "licence and pinned commit beside them" % len(want))
+
     # ---- corpora: checksums and fetch instructions, not the data
     lines = []
     for rel in ("data/malicious_skill_bench/primary.parquet",
