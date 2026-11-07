@@ -1,2 +1,2 @@
-model,attack,n,n_fired,n_covered,sum_covered
-anthropic/claude-haiku-4.5,clean,835,827,0,0.0
+model,attack,n,n_fired,n_calls_rows,sum_n_calls,n_covered,sum_covered
+anthropic/claude-haiku-4.5,clean,835,827,835,2192.0,0,0.0

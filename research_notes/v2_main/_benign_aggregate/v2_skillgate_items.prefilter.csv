@@ -1,4 +1,4 @@
-model,reader,attack,n,n_fired,sum_prompt_len,n_hits_rows,sum_n_hits,n_covered,sum_covered
-gpt-4o-mini,skillgate,clean,2983,1920,6522974,2983,19486,0,0.0
-gpt-4o-mini,trunc10k,clean,1500,1500,8377762,0,0,0,0.0
-gpt-4o-mini,trunc12k,clean,1500,1500,8943261,0,0,0,0.0
+model,reader,attack,n,n_fired,n_calls_rows,sum_n_calls,sum_prompt_len,n_hits_rows,sum_n_hits,n_covered,sum_covered
+gpt-4o-mini,skillgate,clean,2983,1920,2983,1920.0,6522974,2983,19486,0,0.0
+gpt-4o-mini,trunc10k,clean,1500,1500,1500,1500.0,8377762,0,0,0,0.0
+gpt-4o-mini,trunc12k,clean,1500,1500,1500,1500.0,8943261,0,0,0,0.0

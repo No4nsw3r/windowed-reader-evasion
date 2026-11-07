@@ -272,6 +272,35 @@ the predecessor against $0.083$, 11 of 132, under the current model). That scrip
 cannot run here. The split it computes is reported in the paper and nowhere else in this
 tree; no other number depends on it.
 
+Two further categories are withheld, and both are recurrences of the rule above in channels
+the first implementation of it did not reach. They are recorded here because the earlier
+release of this artifact shipped them.
+
+- **The unpack pilot's benign control arm.** `research_notes/pilot/pilot_unpack2_items.csv`
+  marks its arm with `source_id`, `structural_family_id` and `carrier` rather than with an
+  `arm` column, and `build_artifact.py` shipped whole any table without an `arm` column. So
+  430 rows judging 229 named third-party benign skills reached the tree, 20 of them
+  returning `MALICIOUS`, with an unsalted md5 of the skill body as the key. The build now
+  infers the arm from those markers, those rows ship as counts in
+  `_benign_aggregate/pilot_unpack2_items.csv`, and no number in the paper depends on the
+  per-item rows.
+- **The two audit keys' benign control hashes.** `audit/key/key.csv` carried 30 stratum-D
+  and `audit_jointmiss/key/key.csv` 15 stratum-N control items whose `skill_hash` is an md5
+  of a named third-party body. Both now carry surrogates for those rows; the malicious-arm
+  hashes are unchanged, so every grouping in the packets is preserved.
+
+`build_artifact.py` ends in a **release gate** that fails the build if any shipped row pairs
+a benign-arm marker with a 32-hex identifier, in any file and any column. It needs neither
+corpus nor a model call, and it runs over the tree about to be published rather than over
+the code that produced it, which is what the two fixes above should have been checked
+against the first time.
+
+One thing this does **not** withhold, and which a reader should know: 488 skills appear in
+both public corpora, so a malicious-arm `skill_hash` can sometimes be inverted against the
+benign corpus as well. The verdict on such a row is a verdict on a skill the malicious
+benchmark labels malicious, which is this paper's subject, and the overlap is a property of
+the two upstream releases rather than a disclosure by us.
+
 Otherwise nothing is held back. The malicious items ship with their text, the audit sheets
 with their verdicts and evidence quotes, and the human audit with its filled sheet, its
 blank template and its unblinding key.

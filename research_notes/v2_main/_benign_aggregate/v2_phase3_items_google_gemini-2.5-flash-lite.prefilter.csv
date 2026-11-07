@@ -1,2 +1,2 @@
-model,attack,n,n_fired,n_covered,sum_covered
-google/gemini-2.5-flash-lite,clean,1200,1192,0,0.0
+model,attack,n,n_fired,n_calls_rows,sum_n_calls,n_covered,sum_covered
+google/gemini-2.5-flash-lite,clean,1200,1192,1200,4354.0,0,0.0

@@ -1,4 +1,10 @@
-model,arm,attack,verdict,n
-gpt-4o-mini,ben,clean,MALICIOUS,70
-gpt-4o-mini,ben,clean,OVERFLOW,42
-gpt-4o-mini,ben,clean,SAFE,1388
+model,arm,attack,config,verdict,n
+gpt-4o-mini,ben,clean,dedup_full,MALICIOUS,193
+gpt-4o-mini,ben,clean,dedup_full,SAFE,1307
+gpt-4o-mini,ben,clean,dedup_lmax,MALICIOUS,162
+gpt-4o-mini,ben,clean,dedup_lmax,OVERFLOW,57
+gpt-4o-mini,ben,clean,dedup_lmax,SAFE,1281
+gpt-4o-mini,ben,clean,dedup_small,MALICIOUS,165
+gpt-4o-mini,ben,clean,dedup_small,SAFE,1335
+gpt-4o-mini,ben,clean,none,MALICIOUS,71
+gpt-4o-mini,ben,clean,none,SAFE,1429

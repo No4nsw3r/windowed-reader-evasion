@@ -1,0 +1,11 @@
+model,arm,carrier,stage,verdict,n
+gpt-4o-mini,ben,benign_archive,norm,MALICIOUS,1
+gpt-4o-mini,ben,benign_archive,norm,SAFE,7
+gpt-4o-mini,ben,benign_body,norm,MALICIOUS,10
+gpt-4o-mini,ben,benign_body,norm,SAFE,190
+gpt-4o-mini,ben,benign_body,raw,MALICIOUS,10
+gpt-4o-mini,ben,benign_body,raw,SAFE,190
+gpt-4o-mini,ben,benign_bytecode,norm,SAFE,8
+gpt-4o-mini,ben,benign_referenced,norm,MALICIOUS,1
+gpt-4o-mini,ben,benign_referenced,norm,SAFE,6
+gpt-4o-mini,ben,benign_window,norm,SAFE,7

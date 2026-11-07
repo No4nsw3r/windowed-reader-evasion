@@ -52,9 +52,82 @@ SKIP_SCRIPTS = {"to_usenix_v3.py", "build_ko_pdf.py", "diag_openai.py",
                 "diag_attacker.py", "_deident_terms.py"}
 
 # ---------------------------------------------------------------- benign-arm allowlist
+# Design factors the benign aggregate may group on, and that its de-duplication must key
+# on. `config`, `carrier`, `stage` and `nseg` were missing, and the first omission cost a
+# published table its route: without `config` the de-duplication below collapsed the four
+# reader configurations of `v2_phase2_items.csv` into one row per skill, taking 6,000
+# benign rows to 1,500, and the aggregate lost the column that indexes `tab:cost`'s four
+# reader rows. Every cell of that table is correct in the source and none of it could be
+# recomputed from the release, which is what the Open Science section promises.
 FACTORS = ["model", "judge", "arm", "attack", "reader", "defense", "phase", "ruleset_n",
-           "dose", "share", "granularity", "effort", "condition", "k", "geometry"]
+           "dose", "share", "granularity", "effort", "condition", "k", "geometry",
+           "config", "carrier", "stage", "nseg"]
 VERDICTS = ["verdict", "llm", "cisco", "skillfrisk", "fired", "decision", "outcome"]
+
+# ---------------------------------------------------------------- arm inference
+# A table that marks its control arm with something other than an `arm` column used to
+# bypass the withholding entirely, because `split_arm` shipped any such table whole.
+# `pilot_unpack2_items.csv` is why this exists: 430 of its rows judge a named third-party
+# benign skill, 20 of them return MALICIOUS, and its `skill_hash` is an unsalted md5 of
+# the skill text over a corpus that is public, so each one inverts to a repository and a
+# path. That is the benign arm's per-skill verdict on third-party code, the one category
+# this release withholds everywhere else. Checked against every source table the build
+# copies: only that file carries any of these markers, and its three agree on the same
+# 430 rows, so inference cannot withhold a malicious row by mistake.
+BEN_MARKERS = (
+    ("source_id", ("skillmd138k", "skillmd_138k")),
+    ("provenance", ("skillmd_138k",)),
+    ("source_name", ("skillmd_138k",)),
+    ("structural_family_id", ("benign",)),
+    ("upstream", ("benign",)),
+)
+BEN_PREFIX = ("carrier", "benign")
+
+# Tables that legitimately have no `arm` column because every row is malicious-arm. A
+# table with a per-skill hash beside a verdict, no arm, no marker and no entry here stops
+# the build instead of shipping: that combination is exactly how the leak above got out.
+MAL_ONLY = {"v3_span_read_frac_items.csv", "v3_span_read_frac_spans.csv",
+            "v3_span_read_frac_cells.csv", "exp1_calls.csv", "pilot_dil2_items.csv",
+            "pilot_realism_items.csv", "exp4_il_granularity.csv",
+            "pilot_stats_items.csv"}
+
+
+def infer_arm(d):
+    """A boolean mask over `d`'s rows: True where the row's subject is a benign skill."""
+    m = pd.Series(False, index=d.index)
+    for col, vals in BEN_MARKERS:
+        if col in d.columns:
+            m = m | d[col].fillna("").astype(str).str.strip().isin(vals)
+    col, pre = BEN_PREFIX
+    if col in d.columns:
+        m = m | d[col].fillna("").astype(str).str.strip().str.startswith(pre)
+    return m
+
+
+def surrogate_benign_hashes(d, col="skill_hash"):
+    """Replace benign-arm rows' `col` with a surrogate, in order of first appearance.
+
+    The two audit keys ship a per-item hash so that an item can be tied to the corpus it
+    came from. For the 30 stratum-D and 15 stratum-N control items that hash is an md5 of
+    a named third-party benign body, so it pairs a third party's identity with this
+    paper's use of it. Malicious-arm hashes are untouched.
+    """
+    if col not in d.columns:
+        return d, 0
+    m = infer_arm(d)
+    if not m.any():
+        return d, 0
+    d = d.copy()
+    sur, out = {}, []
+    for h, b in zip(d[col].fillna("").astype(str), m.values):
+        if not b or not h:
+            out.append(h)
+            continue
+        if h not in sur:
+            sur[h] = "ben%04d" % (len(sur) + 1)
+        out.append(sur[h])
+    d[col] = out
+    return d, len(sur)
 
 # Prose files that ship. The measurement reports are regenerable by running the scripts,
 # so only the two the shipped scripts actually read are included, plus the followup
@@ -112,8 +185,21 @@ def split_arm(src, dst_dir, name):
         print("  READ FAIL %s (%s)" % (name, e))
         return 0, 0
     if "arm" not in d.columns:
-        d.to_csv(os.path.join(dst_dir, name), index=False)
-        return len(d), 0
+        ben_mask = infer_arm(d)
+        if ben_mask.any():
+            d = d.copy()
+            d["arm"] = ["ben" if b else "mal" for b in ben_mask.values]
+        else:
+            has_hash = any("hash" in c.lower() for c in d.columns)
+            has_verdict = any(c in VERDICTS for c in d.columns)
+            assert not (has_hash and has_verdict and name not in MAL_ONLY), (
+                "%s pairs a per-skill hash with a verdict, has no `arm` column and no "
+                "benign marker, so this build cannot tell its arms apart. Give it an "
+                "`arm` column or classify it in MAL_ONLY. Shipping such a table whole is "
+                "how a benign arm's per-skill verdicts reached the public tree once "
+                "already." % name)
+            d.to_csv(os.path.join(dst_dir, name), index=False)
+            return len(d), 0
     ben = d[d.arm == "ben"]
     keep = d[d.arm != "ben"]
     if "skill_hash" in d.columns:
@@ -146,7 +232,10 @@ def split_arm(src, dst_dir, name):
     # the design factors only, never on a verdict or a hash, and written to its own file so
     # the counts above keep the shape the published rates are read from.
     PF = ["prompt_len", "n_hits", "n_calls", "covered"]
-    gcols = [c for c in ("judge", "model", "reader", "attack") if c in ben.columns]
+    # `config` indexes the reader in `v2_phase2_items.csv` exactly as `reader` does
+    # elsewhere; without it the four reader rows of `tab:cost` collapse into one.
+    gcols = [c for c in ("judge", "model", "reader", "config", "attack")
+             if c in ben.columns]
     if gcols and any(c in ben.columns for c in PF):
         b = ben.copy()
         # Drop ERR rows. They are not verdicts, and a cell that errored in one shard and
@@ -168,6 +257,10 @@ def split_arm(src, dst_dir, name):
             # "the prefilter selected something".
             if "n_calls" in grp.columns:
                 row["n_fired"] = int((grp["n_calls"].fillna(0) > 0).sum())
+                # The call count itself, so that the throughput column of `tab:cost` has
+                # a route on the benign arm. A sum over 1500 artifacts names none of them.
+                nc = grp["n_calls"].dropna()
+                row["n_calls_rows"], row["sum_n_calls"] = int(len(nc)), float(nc.sum())
             elif "prompt_len" in grp.columns:
                 row["n_fired"] = int((grp["prompt_len"].fillna(0) > 0).sum())
             if "prompt_len" in grp.columns:
@@ -287,8 +380,8 @@ def main():
     # ---- label audit (450 items): stratum B is the flagged-benign arm and is withheld
     key = pd.read_csv(os.path.join(ROOT, "audit", "key", "key.csv"), dtype=str)
     bad = set(key[key.stratum == "B"].item_id)
-    key[key.stratum != "B"].to_csv(os.path.join(_mk(OUT, "audit", "key"), "key.csv"),
-                                   index=False)
+    shipped_key, n_sur = surrogate_benign_hashes(key[key.stratum != "B"])
+    shipped_key.to_csv(os.path.join(_mk(OUT, "audit", "key"), "key.csv"), index=False)
     ni = 0
     for f in sorted(os.listdir(os.path.join(ROOT, "audit", "items"))):
         if f.replace(".md", "") in bad:
@@ -320,6 +413,7 @@ def main():
               os.path.join(OUT, "audit", "rubric_ko.md"))
     copy_text(os.path.join(ROOT, "audit", "rubric_en.md"),
               os.path.join(OUT, "audit", "rubric_en.md"))
+    print("  label audit: %d benign control hashes replaced by surrogates" % n_sur)
     print("  label audit: %d of 450 items shipped, %d stratum-B withheld"
           % (ni, len(bad)))
 
@@ -330,13 +424,19 @@ def main():
         copy_text(os.path.join(src, "items", f),
                   os.path.join(OUT, "audit_jointmiss", "items", f))
         nj += 1
-    for rel, dst in (("key/key.csv", "key/key.csv"),
-                     ("sheet.csv", "sheet_blank.csv"),
+    for rel, dst in (("sheet.csv", "sheet_blank.csv"),
                      ("sheet_human.csv", "sheet_human.csv"),
                      ("START_HERE.md", "GUIDE_ko.md"),
                      ("GUIDE_en.md", "GUIDE_en.md")):
         copy_text(os.path.join(src, rel), os.path.join(OUT, "audit_jointmiss", dst))
-    print("  human audit: %d items, the filled sheet and the key" % nj)
+    # The key carries a per-item hash, and for the 15 benign control items that hash is an
+    # md5 of a named third-party body, so it goes through the same surrogate as the label
+    # audit's own key rather than through copy_text.
+    jk = pd.read_csv(os.path.join(src, "key", "key.csv"), dtype=str)
+    jk, n_jsur = surrogate_benign_hashes(jk)
+    jk.to_csv(os.path.join(_mk(OUT, "audit_jointmiss", "key"), "key.csv"), index=False)
+    print("  human audit: %d items, the filled sheet and the key "
+          "(%d benign control hashes surrogated)" % (nj, n_jsur))
 
     # ---- the third-party ruleset: shipped, with its licence and a pinned commit
     # Appendix F's measurement of the released 530-pattern ruleset is the paper's most
@@ -432,6 +532,53 @@ def main():
     print("non-ASCII paths left:",
           [os.path.relpath(p, OUT) for p in files
            if not all(ord(c) < 128 for c in os.path.basename(p))] or "none")
+    release_gate(OUT)
+
+
+def release_gate(out):
+    """Fail the build if any shipped row pairs a benign-arm marker with a raw identifier.
+
+    Both withholding failures this release has had were one shape: a benign-arm record
+    reaching the public tree with an identifier that inverts against a public corpus. The
+    gate-window `key` field was the first, `pilot_unpack2_items.csv` the second, and the
+    second got out because the fix for the first was written against the channel rather
+    than against the shape. This check does not care how the arm is marked, which file it
+    is in or which column holds the identifier. It needs no corpus and no model call, and
+    it runs over the tree that is about to be published rather than over the code that
+    produced it.
+    """
+    HEX = set("0123456789abcdef")
+    bad = []
+    for dp, dirs, fs in os.walk(out):
+        dirs[:] = [d for d in dirs if d != ".git"]
+        for f in fs:
+            if not f.endswith(".csv"):
+                continue
+            p = os.path.join(dp, f)
+            try:
+                d = pd.read_csv(p, dtype=str, low_memory=False, on_bad_lines="skip")
+            except Exception:
+                continue
+            if d.empty:
+                continue
+            m = infer_arm(d)
+            if "arm" in d.columns:
+                m = m | d["arm"].fillna("").astype(str).str.strip().eq("ben")
+            if not m.any():
+                continue
+            for c in [c for c in d.columns if "hash" in c.lower()]:
+                v = d.loc[m, c].fillna("").astype(str).str.strip()
+                raw = [s for s in v if len(s) == 32 and set(s) <= HEX]
+                if raw:
+                    bad.append("%s: %d benign-arm rows carry a raw %s"
+                               % (os.path.relpath(p, out), len(raw), c))
+    print()
+    if bad:
+        print("RELEASE GATE FAILED -- a benign-arm row is shipping a raw identifier:")
+        for b in bad:
+            print("  " + b)
+        sys.exit(1)
+    print("release gate: no benign-arm row ships a raw identifier")
 
 
 def _mk(*parts):
