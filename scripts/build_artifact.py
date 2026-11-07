@@ -373,6 +373,12 @@ def main():
                 held += h
             elif f == "v3_gate_windows.jsonl":
                 copy_gate_windows(p, os.path.join(dd, f))
+            elif f == "v3_disputed_in_grid.json":
+                # The nine audit-disputed artifacts inside the frontier grid, with the
+                # consensus rule that selected them. `v3_grid_robustness.py` asserts on
+                # this file, so without it that script cannot run in a built tree. Every
+                # hash in it is a malicious-arm artifact, which this release ships anyway.
+                copy_text(p, os.path.join(dd, f))
             elif f in MD_OK:
                 copy_text(p, os.path.join(dd, f))
     print("  result rows: %d shipped, %d benign rows replaced by counts" % (kept, held))

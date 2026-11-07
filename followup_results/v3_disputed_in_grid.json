@@ -1,0 +1,16 @@
+{
+ "stratum": "A",
+ "rule": "v2_phase5_audit_score.py:160-175 consensus, stratum A, consensus BENIGN",
+ "n_grid": 165,
+ "hashes": [
+  "2d28a764a21c45bbf46653a32fcf423d",
+  "44591ea83695e043ad9976cc1b5868be",
+  "4b0cdcb033a5300ed5b3644a25ad750f",
+  "6b258ed08aa66834b031d3cea2269eac",
+  "8155f9d43982f4f2e606e3a521554541",
+  "9e346a368a92698dfcdd388b992168c1",
+  "9ef644795aaa4e692800a5f4896e6aee",
+  "d2c651c011913c202060e90543f19b2b",
+  "f9d8cf2aa9bbfe249d0519e118cfc346"
+ ]
+}

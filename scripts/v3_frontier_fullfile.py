@@ -62,6 +62,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pilot_audit2 as A
 import pilot_dil2 as D
 import v2_skillgate as SG
+# `SG.segments_for` knows `clean`, `d_real` and `il_matched` and delegates the rest to the
+# Phase 1 kill tests, which do not define `il_heavy`. `v2_phase3_cross.segments_for` is the
+# superset: it builds all eleven conditions, mirrors the published transforms for the ones
+# that already exist, and defines `il_heavy` with the same parameters as the dilution pilot
+# that measured it (16 fragments, filler max(8000, 2*len)). Use it for the artifact text so
+# every cell in this grid comes from one construction.
+import v2_phase3_cross as X3
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -93,6 +100,17 @@ FIELDS = ["judge", "skill_hash", "arm", "attack", "reader", "route", "payload_le
 # `il_matched` are the two that also exist on the direct route; they are the bridge.
 ATTACKS = ["clean", "d_real", "uniq_pad_20k", "neardup_10k", "topical_10k",
            "gap_il_4x2600", "il_matched"]
+# The four the paper named as having no measurement at this reader on any judge. Added
+# after a reviewer pointed out that `uniq_suf_20k` is the harness's only probe of dilution
+# with the payload fully in view, and the full read's whole claim is that coverage is no
+# longer the failure. These are the long conditions -- 22k, 52k, 23k and 10k characters
+# against the first seven's 11k mean -- so they cost more per cell than the grid did.
+# `done_set()` keys on (judge, attack, hash) and counts only a decided verdict, so adding
+# them here runs the missing cells and leaves the 4,620 already on disk untouched.
+ATTACKS += ["uniq_suf_20k", "uniq_pad_50k", "gap_il_6x3000", "il_heavy"]
+# Attacks that fragment the payload, so the whole string is not a substring of the
+# artifact and the preservation assertion in `build()` has to check the pieces instead.
+FRAGMENTING = ("il_matched", "gap_il_4x2600", "gap_il_6x3000", "il_heavy")
 BRIDGE = ("clean", "il_matched")
 
 # paper id -> (OpenRouter model id, send temperature?, transport)
@@ -175,8 +193,13 @@ def build():
     for atk in ATTACKS:
         for h, S in skills:
             sd = D.md5seed(S, "p3")
-            art = "".join(t for t, _ in SG.segments_for(S, atk, sd))
-            assert S in art or atk in ("il_matched", "gap_il_4x2600"), "payload lost"
+            segs = X3.segments_for(S, atk, sd)
+            art = "".join(t for t, _ in segs)
+            if atk in FRAGMENTING:
+                # the payload is in pieces, so check that the pieces concatenate to it
+                assert "".join(t for t, p in segs if p) == S, "payload altered by " + atk
+            else:
+                assert S in art, "payload lost under " + atk
             cells[(atk, h)] = (S, art)
     return cells
 

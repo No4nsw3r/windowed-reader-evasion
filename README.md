@@ -126,7 +126,9 @@ downloading. These are the scripts that derive a published number; the rest of
 | `v3_power_asymmetry.py` | the structural effect with exact intervals, its minimum detectable effect, and the power asymmetry between the two geometries |
 | `v3_missets.py` | the two readers' miss sets at `gap_il_4x2600`, the 45 the regex reader catches and the partition passes |
 | `v3_caughtset_correction.py` | the caught set's two error-rate estimates, the correction run at each, and the 18.3x insulation ratio. Its benign block reads the aggregate counts here, and says so |
-| `v3_frontier_analyze.py` | the frontier full-read grid: 4,620 cells, four frontier judges, seven attacks, with exact intervals, BOTH refusal conventions and the two-route bridge. Offline; refuses to print unless every published cell reproduces |
+| `v3_frontier_analyze.py` | the frontier full-read grid: 7,260 cells, four frontier judges, ten of the harness's fourteen attacks, with exact intervals, BOTH refusal conventions and the two-route bridge. Offline; refuses to print unless every published cell reproduces |
+| `v3_grid_robustness.py` | what that grid can and cannot resolve: the same cells under both refusal conventions crossed with the label-corrected population, the share of each judge's attack success carried by the nine audit-disputed artifacts, and per-attack refusal at this reader, which no table prints |
+| `v3_structural_prefilter.py` | six structural features of the artifact, thresholded on 138,133 real benign bodies at a 1% budget. The cheapest defense we did not build, and the clearest limit on our own attacks |
 | `v3_granularity.py` | the fragment-granularity sweep at fixed filler volume: 3,300 cells, five granularities, four readers, with the exact intervals, the sign flip and the pinned-geometry check |
 | `v3_window_density.py` | the per-window payload density at both geometries, on all three of the statistics that have been compared, so the comparison that inverts cannot be repeated by accident |
 | `v3_reader_disagreement.py` | the direction behind the 0.827 agreement figure: which of the two readers catches what the other passes. Refuses to print unless the published cell reproduces |
@@ -135,18 +137,20 @@ downloading. These are the scripts that derive a published number; the rest of
 
 **Needs the two corpora, which are fetched rather than redistributed.** Run
 `scripts/acquire_data.py` (adds `huggingface_hub` and `pyarrow`, and network). No API key
-and no cost. Without it these seven stop on a missing `.parquet`, which was checked by
+and no cost. Without it these eight stop on a missing `.parquet`, which was checked by
 running each one in a built tree with no corpus present: `v2_layering.py`,
 `v2_skillgate.py`, `v2_phase3_cross.py`, `v3_span_read_frac.py`,
-`v3_jointmiss_audit_pack.py`, `v3_real_ruleset.py` and `v3_window_density.py`. The last two
-reach the corpus through `v2_skillgate.py` and `v3_span_read_frac.py` rather than reading it
-themselves, which is why they were missing from this list until the run that produced it.
+`v3_jointmiss_audit_pack.py`, `v3_real_ruleset.py`, `v3_window_density.py` and
+`v3_structural_prefilter.py`. Three of them reach the corpus through another script rather
+than reading it themselves, which is why they were missing from this list until the run that
+produced it. `v3_structural_prefilter.py` needs it twice over: for the filler pool and for
+the 138,133 real bodies its threshold is calibrated on.
 
 **Needs API keys and money to regenerate.** Every judging run — `v3_gate_score.py`,
 `v3_newreaders.py`, `v3_frontier_fullfile.py`, `v2_haiku_full.py`, `validate_pipeline.py`
 and the `pilot_*` family. Their outputs are what this artifact ships, so nothing above has
-to call a model. `v3_frontier_fullfile.py` is the one that ran the frontier grid, at \$8.24
-over 4,620 cells; `v3_frontier_analyze.py` derives every figure the appendix prints from the
+to call a model. `v3_frontier_fullfile.py` is the one that ran the frontier grid, at \$8.24 for its
+first 4,620 cells and \$12.35 for the 2,640 that extended it to ten attacks; `v3_frontier_analyze.py` derives every figure the appendix prints from the
 two shards it left behind, so the grid is checkable without rerunning it. Those shards keep
 1,666 `ERR` rows that the driver superseded on resume — it re-runs anything without a
 decided verdict — and the analysis script drops them and then asserts 165 decided cells in
@@ -205,7 +209,9 @@ and $0.129$, any per-skill pairing, and any statistic over individual benign ite
 | Cross-judge replication | `scripts/v2_phase3_cross.py`, `scripts/v2_final_recompute.py` | `research_notes/v2_main/v2_phase3_items_*.csv` |
 | The released 530-pattern ruleset and the no-window reader, judge side, malicious arm: 10,410 cells over nine judges | `scripts/v3_malarm_analyze.py` | `followup_results/v3_newreaders_cells*.csv` |
 | The same two readers' benign arm, 29,830 cells — **rates only**, from the aggregate, because the script needs the withheld per-item rows | (none; see below) | `followup_results/_benign_aggregate/v3_newreaders_cells_pubben*.csv` |
-| The frontier judges reading the whole file, on all seven attacks: no attack exceeds the unattacked baseline, and the ranking of the four rows reverses between the two refusal conventions | `scripts/v3_frontier_analyze.py` | `followup_results/v3_frontier_fullfile*.csv`, and `v3_newreaders_cells*.csv` for the route bridge |
+| The frontier judges reading the whole file, on ten of fourteen attacks: the longest padding condition exceeds the unattacked baseline on the one judge that refuses nothing, and the ranking of the four rows reverses between the two refusal conventions | `scripts/v3_frontier_analyze.py` | `followup_results/v3_frontier_fullfile*.csv`, and `v3_newreaders_cells*.csv` for the route bridge |
+| What that grid can resolve, under both conventions and both populations, and the refusal signal underneath it | `scripts/v3_grid_robustness.py` | the same shards plus `followup_results/v3_disputed_in_grid.json` |
+| A structural prefilter: the share of each condition a single shape feature flags at a 1% benign budget | `scripts/v3_structural_prefilter.py` | the two corpora and the harness seed; no judged cells needed |
 | Fragment granularity at fixed filler volume, and the 15 points of attack success that move with the reader geometry pinned | `scripts/v3_granularity.py` | `followup_results/exp4_il_granularity.csv` |
 | Per-window payload density at both geometries, and the three statistics that have been confused for one another | `scripts/v3_window_density.py` | the corpus and the harness seed; no judged cells needed |
 | Which reader catches what the other passes, behind the 0.827 agreement figure | `scripts/v3_reader_disagreement.py` | `research_notes/v2_main/v2_phase*_items.csv`, `v2_skillgate_items.csv` |
