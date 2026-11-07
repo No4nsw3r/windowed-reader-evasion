@@ -276,14 +276,17 @@ Two further categories are withheld, and both are recurrences of the rule above 
 the first implementation of it did not reach. They are recorded here because the earlier
 release of this artifact shipped them.
 
-- **The unpack pilot's benign control arm.** `research_notes/pilot/pilot_unpack2_items.csv`
-  marks its arm with `source_id`, `structural_family_id` and `carrier` rather than with an
-  `arm` column, and `build_artifact.py` shipped whole any table without an `arm` column. So
-  430 rows judging 229 named third-party benign skills reached the tree, 20 of them
-  returning `MALICIOUS`, with an unsalted md5 of the skill body as the key. The build now
-  infers the arm from those markers, those rows ship as counts in
-  `_benign_aggregate/pilot_unpack2_items.csv`, and no number in the paper depends on the
-  per-item rows.
+- **The unpack pilot's benign control arm.** In the source table the arm is marked by
+  `source_id`, `structural_family_id` and `carrier` rather than by an `arm` column, and
+  `build_artifact.py` shipped whole any table that had no `arm` column. So 430 rows judging
+  230 named third-party benign skills reached the tree — 22 of those rows returning
+  `MALICIOUS` over 12 distinct skills — keyed by an unsalted md5 of the skill body, and all
+  230 inverted against the public benign corpus to a repository and a path. The build now
+  infers the arm from those three markers and routes the rows through the ordinary split, so
+  they ship as counts in `_benign_aggregate/pilot_unpack2_items.csv`. The per-item file
+  `research_notes/pilot/pilot_unpack2_items.csv` therefore carries 736 malicious-arm rows
+  and **does** have an `arm` column, which the build adds: the column is absent upstream and
+  present in what ships. No number in the paper depends on the withheld rows.
 - **The two audit keys' benign control hashes.** `audit/key/key.csv` carried 30 stratum-D
   and `audit_jointmiss/key/key.csv` 15 stratum-N control items whose `skill_hash` is an md5
   of a named third-party body. Both now carry surrogates for those rows; the malicious-arm
